@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from typing import Callable
-
+import os.path
 
 class MySQLAlchemy(SQLAlchemy):
     Column: Callable
@@ -11,8 +11,17 @@ class MySQLAlchemy(SQLAlchemy):
 
 
 app = Flask(__name__)
-with open("tmp/database.db", "wb") as f:
-    pass
+
+if not os.path.exists("tmp/database.db"):
+    with open("tmp/database.db", "wb") as f:
+        print("Database.db is not found!!!\nCreated database.db")
+        f.close()
+else:
+    with open("tmp/database.db", "ab") as f:
+        print("Opened database.db")
+        f.close()
+
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp/database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = MySQLAlchemy(app)
