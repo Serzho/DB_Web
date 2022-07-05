@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from typing import Callable
 import os.path
 
+
 class MySQLAlchemy(SQLAlchemy):
     Column: Callable
     String: Callable
@@ -15,11 +16,15 @@ app = Flask(__name__)
 if not os.path.exists("tmp/database.db"):
     with open("tmp/database.db", "wb") as f:
         print("Database.db is not found!!!\nCreated database.db")
+        database_loaded = False
         f.close()
+
 else:
     with open("tmp/database.db", "ab") as f:
         print("Opened database.db")
+        database_loaded = True
         f.close()
+
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp/database.db'

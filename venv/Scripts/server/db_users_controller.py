@@ -3,8 +3,7 @@ from getpass import getpass
 
 from sqlalchemy.ext.declarative import *
 
-from db_users_create import User
-from db_users_create import db
+from db_users_create import User, db, database_loaded
 
 Base = declarative_base()
 
@@ -16,7 +15,8 @@ class DB_Users_Controller:
         print("Creating users table...")
         db.create_all()
         print("Successful creating!")
-        self.create_main_admin()
+        if not database_loaded:
+            self.create_main_admin()
         # self.get()
 
     def create_main_admin(self):
