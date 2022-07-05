@@ -1,3 +1,3 @@
 from db_controller import DB_Controller
-print("Start_server")
+print("Starting_server...")
 db_controller = DB_Controller()
