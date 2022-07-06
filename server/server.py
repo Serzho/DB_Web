@@ -1,9 +1,10 @@
 from db_users_controller import DB_Users_Controller
 from fastapi import *
+from fastapi.responses import FileResponse
 import uvicorn
 
 print("Starting_server...")
-# db_users_controller = DB_Users_Controller()
+db_users_controller = DB_Users_Controller()
 app = FastAPI()
 
 
@@ -11,10 +12,10 @@ app = FastAPI()
 async def test():
     print(Request.base_url)
 
-@app.get("/aaa/")
+@app.get("/item")
 async def root():
     # print("ANSWER")
-    return {"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA":"NE AKAI MNE TUT"}
+    return FileResponse("tmp/database.db")
 
 
 @app.middleware("http")
