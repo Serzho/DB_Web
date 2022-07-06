@@ -3,20 +3,24 @@ from fastapi import *
 from fastapi.responses import FileResponse
 import uvicorn
 
+
 print("Starting_server...")
 db_users_controller = DB_Users_Controller()
 app = FastAPI()
 
-
-@app.get("")
+@app.get("/test")
 async def test():
-    print(Request.base_url)
+    return "Successfully connect to server!"
 
 @app.get("/item")
-async def root():
+async def get_item():
     # print("ANSWER")
     return FileResponse("tmp/database.db")
 
+@app.post("/auth")
+async def auth(request: Request):
+    # print(data.login_details)
+    return "Please, authorize!"
 
 @app.middleware("http")
 async def debug_request(request: Request, call_next):
