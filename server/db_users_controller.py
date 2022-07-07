@@ -6,10 +6,13 @@ from sqlalchemy.orm import *
 
 from db_users_create import User, db_users_loaded, Base
 import secrets
+from tokens_controller import TokensController
+from datetime import  datetime
 
 
 class DB_Users_Controller:  # класс контроллера базы данных пользователя
     session = None
+    tokens_controller = None
 
     def __init__(self):
         print("Creating users table...")
@@ -19,6 +22,9 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         print("Successful creating!")
         if not db_users_loaded:  # создание учетной записи администратора при создании новой бд
             self.create_main_admin()
+        self.tokens_controller = TokensController(self)
+        self.tokens_controller.start()
+
 
         # self.get()
 
@@ -63,6 +69,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
             print("Correct!")
             print("Creating access token...")
             token = self.create_token(id_auth_user)
+            self.tokens_controller.tokens_time.update({id_auth_user: datetime.now()})
             print("Token successfully created!")
 
         return id_auth_user, token
@@ -77,3 +84,13 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         self.session.commit()
 
         return token
+
+    def delete_token(self, id_token: int):
+        user = self.session.query(User).filter(User.id == id_token).first()
+        user.is_active = False
+        user.access_token = ""
+        self.session.commit()
+
+    def stop_tokens_controller(self):
+        self.tokens_controller.is_running = False
+        self.tokens_controller.join()

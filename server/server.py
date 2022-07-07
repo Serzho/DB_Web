@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 import uvicorn
 from requests_models import *
 
+
 print("Starting_server...")
 db_users_controller = DB_Users_Controller()  # инициализация контроллеа базы данных пользователей
 app = FastAPI()  # создание приложения fast_api
@@ -38,3 +39,4 @@ async def debug_request(request: Request, call_next):
     return response"""
 
 uvicorn.run(app=app, host="localhost", port=9999)  # запуск сервера
+db_users_controller.stop_tokens_controller()
