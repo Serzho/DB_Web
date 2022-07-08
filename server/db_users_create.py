@@ -38,5 +38,5 @@ class User(Base):  # модель базы данных пользователе
         self.name = name
         self.hashed_password = hashed_password
         self.is_active = is_active
-        self.access_token
+        self.access_token = access_token
 

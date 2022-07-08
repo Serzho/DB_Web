@@ -27,9 +27,19 @@ async def auth(auth_info: Auth_info):
     # print(auth_info.name, auth_info.password)
     id_user, token = db_users_controller.auth_user(auth_info.name, auth_info.password)
     if id_user == -1:
-        return "Incorrect name or password"
+        return ""
     else:
-        return f"Correct authentication! Name: {auth_info.name}, Token: {token}"
+        return token
+
+@app.get("/test_token")
+async def test_token(test_token: Test_token):
+    print(f"Testing token {test_token.token}")
+    result = db_users_controller.check_token(test_token.token)
+    if result:
+        print("Correct access token!")
+    else:
+        print("Incorrect access token!")
+    return result
 
 
 """@app.middleware("http")  
