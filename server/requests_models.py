@@ -17,3 +17,7 @@ class Adding_user_token_request(BaseModel):
     name: str
     password: str
     is_admin: str
+
+class Deleting_user_request(BaseModel):
+    id: int
+    token: str

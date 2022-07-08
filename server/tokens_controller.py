@@ -24,10 +24,7 @@ class TokensController(Thread):
                 print(f"Delta time: {delta}")
                 if delta.seconds > 300:
                     self.db_users_controller.delete_token(id_token)
-                    temp = self.tokens_time.get(id_token)
-                    del temp
                     print(f"Token deleted! Id: {id_token}, Delta: {delta.seconds}")
 
-        for id_token in self.tokens_time:
-            self.db_users_controller.delete_token(id_token)
+        self.db_users_controller.clear_access_tokens()
         print("Stopped tokens controller!!!")

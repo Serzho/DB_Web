@@ -19,25 +19,28 @@ if bool(test_request()):
         params = command_input[1:]
         command_input = command_input[0]
         #print(command_input, params)
-        if command_input in commands_list:
-            if command_input == "/help":
-                print_help()
-            elif command_input == "/test":
-                test_request()
-            elif command_input == "/auth":
-                token = auth(*params[:2])
-            elif command_input == "/test_token":
-                test_token(token)
-            elif command_input == "/get_users":
-                get_users(token)
-            elif command_input == "/add_user":
-                add_user(token, *params[:3])
-            elif command_input == "/delete_user":
-                pass
-            elif command_input == "/log_out":
-                pass
-            elif command_input == "/exit":
-                exit()
+        try:
+            if command_input in commands_list:
+                if command_input == "/help":
+                    print_help()
+                elif command_input == "/test":
+                    test_request()
+                elif command_input == "/auth":
+                    token = auth(*params[:2])
+                elif command_input == "/test_token":
+                    test_token(token)
+                elif command_input == "/get_users":
+                    get_users(token)
+                elif command_input == "/add_user":
+                    add_user(token, *params[:3])
+                elif command_input == "/delete_user":
+                    delete_user(token, int(params[0]))
+                elif command_input == "/log_out":
+                    log_out(token)
+                elif command_input == "/exit":
+                    exit()
 
-        else:
-            print("\nWrong command! Please, print /help to get help!")
+            else:
+                print("\nWrong command! Please, print /help to get help!")
+        except TypeError:
+            print("Wrong type of parameter!!!")

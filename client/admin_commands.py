@@ -52,3 +52,11 @@ def get_users(token):
 def add_user(token, name, password, is_admin):
     response = requests.get("http://127.0.0.1:9999/add_user", json={"token": token, "name": name, "password": password, "is_admin": is_admin})
     print(response.text)
+
+def log_out(token):
+    response = requests.get("http://127.0.0.1:9999/log_out", json={"token": token})
+    print("Log outed...")
+
+def delete_user(token, id):
+    response = requests.get("http://127.0.0.1:9999/delete_user", json={"token": token, "id": id})
+    print(response.text)

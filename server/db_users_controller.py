@@ -24,7 +24,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
             self.create_main_admin()
         self.tokens_controller = TokensController(self)
         self.tokens_controller.start()
-
+        self.clear_access_tokens()
 
         # self.get()
 
@@ -89,6 +89,8 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         user = self.session.query(User).filter(User.id == id_token).first()
         user.is_active = False
         user.access_token = ""
+        temp = self.tokens_controller.tokens_time.get(id_token)
+        del temp
         self.session.commit()
 
     def stop_tokens_controller(self):
@@ -112,4 +114,20 @@ class DB_Users_Controller:  # класс контроллера базы дан�
 
     def next_user_id(self) -> int:
         return len(self.session.query(User.id).all())
+
+    def clear_access_tokens(self):
+        for i in range(self.next_user_id()):
+            self.delete_token(i)
+
+    def id_of_token(self, token: str):
+        tokens_list = self.session.query(User.id, User.access_token).filter(User.access_token == token.strip("\"")).first()
+        print(f"id of token {list(tokens_list)[0]}")
+        return list(tokens_list)[0]
+
+    def delete_user(self, id_user):
+        self.delete_token(id_user)
+        user = self.session.query(User).filter(User.id == id_user)
+        user.delete()
+        self.session.commit()
+
 

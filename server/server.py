@@ -50,12 +50,25 @@ async def get_users(token_request: Standart_token_request):
         return None
 
 @app.get("/add_user")
-async def get_users(token_request: Adding_user_token_request):
+async def add_user(token_request: Adding_user_token_request):
     if db_users_controller.check_token_exists(token_request.token) and db_users_controller.check_token_admin(token_request.token):
         db_users_controller.add_user( id= db_users_controller.next_user_id(), name= token_request.name, password= token_request.password, is_admin=token_request.is_admin == "True")
         return "Correct creation!"
     else:
         print(f"Admin request with incorrect token!!! Token: {token_request.token}")
+        return f"Admin request with incorrect token!!! Token: {token_request.token}"
+
+@app.get("/log_out")
+async def log_out(token_request: Standart_token_request):
+    db_users_controller.delete_token(db_users_controller.id_of_token(token_request.token))
+
+@app.get("/delete_user")
+async def delete_user(token_request: Deleting_user_request):
+    if db_users_controller.check_token_exists(token_request.token) and db_users_controller.check_token_admin(
+            token_request.token):
+        db_users_controller.delete_user(token_request.id)
+        return f"Correct deleting user with id = {token_request.id}!"
+    else:
         return f"Admin request with incorrect token!!! Token: {token_request.token}"
 
 """@app.middleware("http")  
