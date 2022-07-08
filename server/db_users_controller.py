@@ -16,7 +16,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
 
     def __init__(self):
         print("Creating users table...")
-        engine = sqlalchemy.create_engine("sqlite:///tmp/database.db")  # создание движка базы данныъ
+        engine = sqlalchemy.create_engine("sqlite:///tmp/database.db?check_same_thread=False")  # создание движка базы данных
         Base.metadata.create_all(engine)  # создание баззы данных
         self.session = Session(bind=engine)  # создание сессии базы данных
         print("Successful creating!")
@@ -48,7 +48,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def add_user(self, id: int, name: str, password: str, is_admin=False,
                  is_active=False):  # создание нового пользователя
         hashed_password = hashlib.md5(password.encode()).hexdigest()  # хэширование пароля
-        user = User(id, is_admin, name, hashed_password, is_active, access_token = None)
+        user = User(id, is_admin, name, hashed_password, is_active, access_token = "")
         self.session.add(user)  # добавление пользователя в сессию
         # for el in db.session:
         #     print(el)
@@ -94,3 +94,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def stop_tokens_controller(self):
         self.tokens_controller.is_running = False
         self.tokens_controller.join()
+
+    def check_token(self, token) -> bool:
+        tokens_list = self.session.query(User.access_token).filter(User.access_token == token.strip("\"")).all()
+        return len(tokens_list) > 0
