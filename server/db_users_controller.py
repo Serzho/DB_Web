@@ -98,3 +98,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def check_token(self, token) -> bool:
         tokens_list = self.session.query(User.access_token).filter(User.access_token == token.strip("\"")).all()
         return len(tokens_list) > 0
+
+    def get_users_dict(self):
+        print(dict(self.session.query(User)))
+        return dict(self.session.query(User))

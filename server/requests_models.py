@@ -9,5 +9,6 @@ class Server_request(BaseModel):  # модель стандартного зап
     command: str
     token: str
 
-class Test_token(BaseModel): # модель запроса проверки токена
+class Standart_token_request(BaseModel): # модель запроса с токеном
     token: str
+
