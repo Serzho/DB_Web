@@ -31,7 +31,7 @@ if bool(test_request()):
             elif command_input == "/get_users":
                 get_users(token)
             elif command_input == "/add_user":
-                pass
+                add_user(token, *params[:3])
             elif command_input == "/delete_user":
                 pass
             elif command_input == "/log_out":

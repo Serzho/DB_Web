@@ -12,3 +12,8 @@ class Server_request(BaseModel):  # модель стандартного зап
 class Standart_token_request(BaseModel): # модель запроса с токеном
     token: str
 
+class Adding_user_token_request(BaseModel):
+    token: str
+    name: str
+    password: str
+    is_admin: str

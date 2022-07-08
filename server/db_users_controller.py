@@ -95,7 +95,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         self.tokens_controller.is_running = False
         self.tokens_controller.join()
 
-    def check_token(self, token) -> bool:
+    def check_token_exists(self, token) -> bool:
         tokens_list = self.session.query(User.access_token).filter(User.access_token == token.strip("\"")).all()
         return len(tokens_list) > 0
 
@@ -105,3 +105,11 @@ class DB_Users_Controller:  # класс контроллера базы дан�
             returning_dict.append(row.__dict__)
         print(returning_dict)
         return returning_dict
+
+    def check_token_admin(self, token) -> bool:
+        tokens_list = self.session.query(User.access_token, User.is_admin).filter(User.access_token == token.strip("\""), User.is_admin == True).all()
+        return len(tokens_list) > 0
+
+    def next_user_id(self) -> int:
+        return len(self.session.query(User.id).all())
+

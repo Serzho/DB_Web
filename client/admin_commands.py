@@ -21,18 +21,17 @@ def test_request():
 
 
 def auth(name = None, password = None):
-    if name == None:
-        print("Please, input the name: ")
-        name = input()
-        print("Please, input the password: ")
-        password = input()
-    response = requests.post('http://127.0.0.1:9999/auth/', json={"name": name, "password": password})
-    if response.text == "":
-        print("Incorrect name or password!")
+    if password is not None:
+        response = requests.post('http://127.0.0.1:9999/auth/', json={"name": name, "password": password})
+        if response.text == "":
+            print("Incorrect name or password!")
+        else:
+            print(f"Correct authentication! Token {response.text}")
+        token = response.text
+        return token
     else:
-        print(f"Correct authentication! Token {response.text}")
-    token = response.text
-    return token
+        print("Incorrect parameters!!!")
+        return ""
 
 def test_token(token):
     response = requests.get("http://127.0.0.1:9999/test_token", json={"token": token})
@@ -49,3 +48,7 @@ def get_users(token):
     else:
         print("Incorrect access token!")
         return None
+
+def add_user(token, name, password, is_admin):
+    response = requests.get("http://127.0.0.1:9999/add_user", json={"token": token, "name": name, "password": password, "is_admin": is_admin})
+    print(response.text)
