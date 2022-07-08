@@ -100,5 +100,8 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         return len(tokens_list) > 0
 
     def get_users_dict(self):
-        print(dict(self.session.query(User)))
-        return dict(self.session.query(User))
+        returning_dict = []
+        for row in self.session.query(User).all():
+            returning_dict.append(row.__dict__)
+        print(returning_dict)
+        return returning_dict

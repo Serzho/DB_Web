@@ -18,7 +18,7 @@ if bool(test_request()):
         command_input.append("")
         params = command_input[1:]
         command_input = command_input[0]
-        print(command_input, params)
+        #print(command_input, params)
         if command_input in commands_list:
             if command_input == "/help":
                 print_help()
