@@ -14,6 +14,7 @@ app = FastAPI()  # создание приложения fast_api
 @app.get("/test")  # тестовый запрос наличия запущенного сервера
 async def test() -> bool:
     print("TEST")
+    db_users_controller.next_user_id()
     return True
 
 
@@ -49,10 +50,12 @@ async def test_token(token_request: Standard_token_request) -> bool:
 async def get_users(token_request: Standard_token_request):
     # проверка токена и прав доступа админа для совершения запроса
     if db_users_controller.check_token_exists(token_request.token) and db_users_controller.check_token_admin(
-            token_request.token):
+            token_request.token) and token_request.token != "":
         return db_users_controller.get_users_dict()
     else:
         print(f"Admin request with incorrect token!!! Token: {token_request.token}")
+        print(f"Token exists: {db_users_controller.check_token_exists(token_request.token)}")
+        print(f"Admin rights: {db_users_controller.check_token_admin(token_request.token)}")
         return None
 
 

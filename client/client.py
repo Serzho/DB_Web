@@ -4,8 +4,9 @@ from admin_commands import *
 
 
 def exit_program():  # функция выхода из программы
-    global is_running
+    global is_running, token
     is_running = False
+    log_out(token)
     print("Exiting the program...")
 
 

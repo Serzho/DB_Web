@@ -58,7 +58,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def auth_user(self, auth_name: str, auth_password: str) -> (int, str):  # аутентификация пользователя
         hashed_auth_password = hashlib.md5(auth_password.encode()).hexdigest()  # хэширование пароля
         print(f"Try to sign in: {auth_name}, {auth_password}")
-        query_names = self.session.query(User.id, User.name, User.hashed_password).all() # выбор по id, имени и паролю
+        query_names = self.session.query(User.id, User.name, User.hashed_password).all()  # выбор по id, имени и паролю
         id_auth_user = -1
         for user in query_names:  # проход по списку пользователей
             if user[1] == auth_name and user[2] == hashed_auth_password:
@@ -107,21 +107,24 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         returning_dict = []
         for row in self.session.query(User).all():  # проход по всем строкам в базе данных
             returning_dict.append(row.__dict__)  # добавление строк из базы данных в виде словаря в выходной список
-        print(returning_dict)
+        # print(returning_dict)
         return returning_dict
 
     def check_token_admin(self, token) -> bool:  # проверка токена на права доступа администратора
         tokens_list = self.session.query(User.access_token, User.is_admin).filter(
-            User.access_token == token.strip("\""), User.is_admin is True).all()
+            User.access_token == token.strip("\""), User.is_admin == bool(1)).all()
         return len(tokens_list) > 0
 
     def next_user_id(self) -> int:  # получение следующего незанятого id
-        # TO DO исправить баг при удаления пользователя
-        return len(self.session.query(User.id).all())
+        temp = self.session.query(User.id).all()[::-1]
+        return temp[0][0] + 1
 
     def clear_access_tokens(self):  # функция удаления всех токенов доступа
         for i in range(self.next_user_id()):
-            self.delete_token(i)
+            try:
+                self.delete_token(i)
+            except AttributeError:
+                pass
 
     def id_of_token(self, token: str) -> int:  # получение id по токену
         tokens_list = self.session.query(User.id, User.access_token).filter(

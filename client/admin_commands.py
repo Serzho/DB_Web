@@ -1,3 +1,5 @@
+import json
+
 import requests
 
 
@@ -45,7 +47,9 @@ def test_token(token):  # проверка токена доступа
 def get_users(token):  # получение списка всех пользователей
     response = requests.get("http://127.0.0.1:9999/get_users", json={"token": token})
     if response.text != "null":
-        print(response.text)
+        users_list = json.loads(response.text)
+        for user in users_list:
+            print(user)
         return response.text
     else:
         print("Incorrect access token!")
