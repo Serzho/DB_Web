@@ -27,7 +27,7 @@ def auth(params):  # запрос аутентификации
     print(f"Auth user {name} with password {password}")
     if password is not None:
         response = requests.post('http://127.0.0.1:9999/auth/', json={"name": name, "password": password})
-        if response.text == '""': #TODO: найти проблему с кавычками
+        if response.text.strip("\"") == '':
             print("Incorrect name or password!")
         else:
             print(f"Correct authentication! Token {response.text}")
@@ -35,7 +35,7 @@ def auth(params):  # запрос аутентификации
         return token
     else:
         print("Incorrect parameters!!!")
-        return ""
+        return ''
 
 
 def test_token(token):  # проверка токена доступа
@@ -46,29 +46,40 @@ def test_token(token):  # проверка токена доступа
         print("Incorrect access token!")
 
 
-def get_users(token):  # получение списка всех пользователей
+def get_users(params: list):  # получение списка всех пользователей
+    # print(params)
+    token = params[::-1][0]
+    print(f"Get users with token {token}")
     response = requests.get("http://127.0.0.1:9999/get_users", json={"token": token})
     if response.text != "null":
         users_list = json.loads(response.text)
         for user in users_list:
             print(user)
-        return response.text
     else:
         print("Incorrect access token!")
-        return None
 
 
-def add_user(token, name, password, is_admin):  # запрос на добавление нового пользователя
-    response = requests.get("http://127.0.0.1:9999/add_user",
-                            json={"token": token, "name": name, "password": password, "is_admin": is_admin})
+def add_user(params):  # запрос на добавление нового пользователя
+    print(params)
+    name, password, is_admin = params[:3]
+    token = params[::-1][0]
+    print(token, name, password, is_admin)
+    response = requests.get(
+        "http://127.0.0.1:9999/add_user",
+        json={"token": token, "name": name, "password": password, "is_admin": is_admin}
+    )
     print(response.text)
 
 
-def log_out(token):  # запрос на отключение токена доступа
+def log_out(params):  # запрос на отключение токена доступа
+    token = params[::-1][0]
     requests.get("http://127.0.0.1:9999/log_out", json={"token": token})
     print("Logged out...")
 
 
-def delete_user(token, id_user):  # запрос на удаление пользователя
+def delete_user(params):  # запрос на удаление пользователя
+    id_user = params[0]
+    token = params[::-1][0]
+    print(f"Deleting request: token {token}, id_user {id_user}")
     response = requests.get("http://127.0.0.1:9999/delete_user", json={"token": token, "id": id_user})
     print(response.text)

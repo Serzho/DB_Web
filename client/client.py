@@ -1,20 +1,32 @@
+import requests.exceptions
+
 from admin_commands import *
 
 # главный исполняемый файл клиента
 
-commands_dict = {"/help": print_help, "/test": test_request, "/auth": auth, "/test_token": test_token,
-                 "/get_users": get_users, "/add_user": add_user, "/delete_user": delete_user,
-                 "/log_out": log_out}  # словарь доступных команд
+commands_dict = {
+    "/help": print_help, "/test": test_request, "/auth": auth, "/test_token": test_token,
+    "/get_users": get_users, "/add_user": add_user, "/delete_user": delete_user,
+    "/log_out": log_out
+}  # словарь доступных команд
 
-token = ""
-if bool(test_request()):  # проверка работы сервера
+token = ''
+server_connected = False
+
+try:
+    server_connected = bool(test_request())
+except requests.exceptions.ConnectionError:
+    print("Server is not connected!!!")
+
+if server_connected:  # проверка работы сервера
     is_running = True
     print("Waiting for command...")
     print_help()  # вывод сообщения с доступными командами
     while is_running:
         command_input = input().split()
-        command_input.append("")
-        command_input.append("")
+        command_input.append('')
+        command_input.append('')
+        command_input.append(token)
         # разделение ввода на команду и параметры
         params = command_input[1:]
         command_input = command_input[0]

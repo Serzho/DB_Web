@@ -93,7 +93,8 @@ class DB_Users_Controller:  # класс контроллера базы дан�
             if user.id == id_token:
                 user.is_active = False
                 user.access_token = ""
-                del self.tokens_controller.tokens_time[id_token]
+                deleting_el = self.tokens_controller.tokens_time.get(id_token)
+                del deleting_el
                 self.session.commit()
                 break
 
@@ -103,8 +104,9 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         print("Stopped tokens controller!!!")
 
     def check_token_exists(self, token) -> bool:  # функция проверки существования токена
+        print(f"Cheking token {token}...")
         tokens_list = self.session.query(User.access_token).filter(User.access_token == token.strip("\"")).count()
-        return bool(tokens_list > 0)
+        return bool(tokens_list > 0) and token != ''
 
     def get_users_dict(self) -> list:  # функция получения списка всех пользователей
         returning_dict = []
@@ -121,9 +123,9 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         return len(tokens_list) > 0
 
     def clear_access_tokens(self):  # функция удаления всех токенов доступа
-        for User.id in self.session.query(User.id).all():
-            # print(f"Id of token to delete: {User.id}")
-            self.delete_token(User.id)
+        for user in self.session.query(User).all():
+            print(f"Id of token to delete: {user.id} by clear_access_tokens")
+            self.delete_token(user.id)
 
     def get_token_id(self, token: str) -> int:  # получение id по токену
         tokens_user = self.session.query(User.id, User.access_token).filter(

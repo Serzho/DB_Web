@@ -18,7 +18,7 @@ class TokensController(Thread):  # контроллер созданных то�
         while self.is_running:
             sleep(15)  # задержка 15 секунд между проверками
             current_time = datetime.now()  # получение текущего времени
-            if len(self.tokens_time) > 1:
+            if len(self.tokens_time) > 0:
                 print(self.tokens_time)  # вывод словаря с токенами
             for id_token in self.tokens_time:
                 delta = current_time - self.tokens_time.get(id_token)  # разница текущего времени и времени создания
