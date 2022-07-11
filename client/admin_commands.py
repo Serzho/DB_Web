@@ -25,7 +25,7 @@ def test_request():  # проверка доступа к серверу
 def auth(name=None, password=None):  # запрос аутентификации
     if password is not None:
         response = requests.post('http://127.0.0.1:9999/auth/', json={"name": name, "password": password})
-        if response.text == "":
+        if response.text == '""': #TODO: найти проблему с кавычками
             print("Incorrect name or password!")
         else:
             print(f"Correct authentication! Token {response.text}")
@@ -64,7 +64,7 @@ def add_user(token, name, password, is_admin):  # запрос на добавл
 
 def log_out(token):  # запрос на отключение токена доступа
     requests.get("http://127.0.0.1:9999/log_out", json={"token": token})
-    print("Log outed...")
+    print("Logged out...")
 
 
 def delete_user(token, id_user):  # запрос на удаление пользователя

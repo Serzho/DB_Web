@@ -4,7 +4,7 @@ from admin_commands import *
 
 
 def exit_program():  # функция выхода из программы
-    global is_running, token
+    global is_running, token #TODO: убрать глобальные переменные
     is_running = False
     log_out(token)
     print("Exiting the program...")
@@ -26,8 +26,8 @@ if bool(test_request()):  # проверка работы сервера
         params = command_input[1:]
         command_input = command_input[0]
         # print(command_input, params)
-        try:
-            if command_input in commands_list:
+        try: #TODO: в трай засовывать минимальные строки
+            if command_input in commands_list: #TODO: переделать вызов команды в список словарей
                 if command_input == "/help":  # вывод сообщения с доступными командами
                     print_help()
                 elif command_input == "/test":  # проверка доступа к серверу
