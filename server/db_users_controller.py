@@ -31,26 +31,24 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         # self.get()
 
     def create_main_admin(self):  # создание первого администратора
-        password = ""
-        is_correct = False
         print("Please, create admin profile: ")
-        while not is_correct:  # защищенный ввод пароля с проверкой #TODO: переделать под continue
+        while True:  # защищенный ввод пароля с проверкой
             print("\nEnter the password: ")
             password = getpass()
             print("Re-enter the password: ")
             if password == getpass():
                 print("Correct password!")
-                is_correct = True
+                break
             else:
                 print("Passwords do not match!")
 
-        self.add_user(id=0, is_admin=True, name="admin", password=password)  # добавление записи в бд
+        self.add_user(is_admin=True, name="admin", password=password)  # добавление записи в бд
         print("Successfully creating admin!")
 
-    def add_user(self, id: int, name: str, password: str, is_admin=False,
+    def add_user(self, name: str, password: str, is_admin=False,
                  is_active=False):  # создание нового пользователя
         hashed_password = hashlib.md5(password.encode()).hexdigest()  # хэширование пароля
-        user = User(id, is_admin, name, hashed_password, is_active, access_token="")
+        user = User(is_admin, name, hashed_password, is_active, access_token="")
         self.session.add(user)  # добавление пользователя в сессию
         # for el in db.session:
         #     print(el)
@@ -59,11 +57,11 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def auth_user(self, auth_name: str, auth_password: str) -> (int, str):  # аутентификация пользователя
         hashed_auth_password = hashlib.md5(auth_password.encode()).hexdigest()  # хэширование пароля
         print(f"Try to sign in: {auth_name}, {auth_password}")
-        query_names = self.session.query(User.id, User.name, User.hashed_password).all()  # выбор по id, имени и паролю
+        query_names = self.session.query(User).all()
         id_auth_user = -1 #TODO: убрать этот бред
         for user in query_names:  # проход по списку пользователей
-            if user[1] == auth_name and user[2] == hashed_auth_password: #TODO: не работать с индексами
-                id_auth_user = user[0]
+            if user.name == auth_name and user.hashed_password == hashed_auth_password: #TODO: не работать с индексами
+                id_auth_user = user.id
         token = ""
         if id_auth_user == -1:
             print("Incorrect name or password!")
@@ -80,10 +78,13 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def create_token(self, id_auth: int) -> str:  # функция создания токена
         token = secrets.token_hex(16)  # получение случайного значения #TODO: исправить безопасность генерации токена
         print(id_auth)
-        user = self.session.query(User).filter(User.id == id_auth).first()
-        print(user, type(user))
-        user.is_active = True  # измение статуса соединения на "активное"
-        user.access_token = token  # добавление токена
+        users = self.session.query(User).all()
+        for user in users:
+            if user.id == id_auth:
+                continue
+            print(user, type(user))
+            user.is_active = True  # измение статуса соединения на "активное"
+            user.access_token = token  # добавление токена
         self.session.commit()  # коммит изменений
 
         return token
@@ -114,22 +115,16 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def check_token_admin(self, token) -> bool:  # проверка токена на права доступа администратора
         tokens_list = self.session.query(User.access_token, User.is_admin).filter(
             User.access_token == token.strip("\""),
-            User.is_admin == bool(1) #TODO: исправить костыль
+            User.is_admin.is_(True) #TODO: исправить костыль
         ).all()
         return len(tokens_list) > 0
 
-    def next_user_id(self) -> int:  # получение следующего незанятого id #TODO: УБРАТЬ ЭТО ВООБЩЕ
-        temp = self.session.query(User.id).all()[::-1]
-        return temp[0][0] + 1
-
     def clear_access_tokens(self):  # функция удаления всех токенов доступа
-        for i in range(self.next_user_id()):
-            try:
-                self.delete_token(i)
-            except AttributeError:
-                pass
+        for User.id in self.session.query(User.id).all():
+            # print(f"Id of token to delete: {User.id}")
+            self.delete_token(User.id)
 
-    def id_of_token(self, token: str) -> int:  # получение id по токену
+    def get_token_id(self, token: str) -> int:  # получение id по токену
         tokens_list = self.session.query(User.id, User.access_token).filter(
             User.access_token == token.strip("\"")).first() #TODO: исправить работу с индексами, кавычки
         print(f"id of token {list(tokens_list)[0]}")

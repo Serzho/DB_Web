@@ -14,7 +14,6 @@ app = FastAPI()  # создание приложения fast_api
 @app.get("/test")  # тестовый запрос наличия запущенного сервера
 async def test() -> bool:
     print("TEST")
-    db_users_controller.next_user_id()
     return True
 
 
@@ -65,7 +64,7 @@ async def add_user(token_request: Adding_user_token_request) -> str:
     if db_users_controller.check_token_exists(token_request.token) and db_users_controller.check_token_admin(
             token_request.token):
         # вызов функции добавления нового пользователя
-        db_users_controller.add_user(id=db_users_controller.next_user_id(), name=token_request.name,
+        db_users_controller.add_user(name=token_request.name,
                                      password=token_request.password, is_admin=token_request.is_admin == "True")
         return "Correct creation!"
     else:
@@ -76,7 +75,7 @@ async def add_user(token_request: Adding_user_token_request) -> str:
 @app.get("/log_out")  # запрос отключения токена (выхода из учетной записи)
 async def log_out(token_request: Standard_token_request):
     # получение id токена и удаление его
-    db_users_controller.delete_token(db_users_controller.id_of_token(token_request.token))
+    db_users_controller.delete_token(db_users_controller.get_token_id(token_request.token))
 
 
 @app.get("/delete_user")  # запрос удаления пользователя
