@@ -12,6 +12,9 @@ def print_help(*params):  # вывод сообщения с доступным�
     print(text)
 
 
+# TODO: Изменить адрес и порт на переменные
+
+
 def test_request(*params):  # проверка доступа к серверу
     print("Trying to connect...")
     response = requests.get('http://127.0.0.1:9999/test')

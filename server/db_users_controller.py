@@ -10,7 +10,6 @@ from tokens_controller import TokensController
 from datetime import datetime
 
 
-
 class DB_Users_Controller:  # класс контроллера базы данных пользователя
     session = None
     tokens_controller = None
@@ -111,14 +110,15 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def get_users_dict(self) -> list:  # функция получения списка всех пользователей
         returning_dict = []
         for row in self.session.query(User).all():  # проход по всем строкам в базе данных
-            returning_dict.append(row.__dict__)  # добавление строк из базы данных в виде словаря в выходной список #TODO: переписать дикт под себя
+            print(type(row))
+            returning_dict.append(row.get_dict())  # добавление строк из базы данных в виде словаря в выходной список
         # print(returning_dict)
         return returning_dict
 
-    def check_token_admin(self, token) -> bool:  # проверка токена на права доступа администратора
+    def check_token_admin(self, token: str) -> bool:  # проверка токена на права доступа администратора
         tokens_list = self.session.query(User.access_token, User.is_admin).filter(
             User.access_token == token.strip("\""),
-            User.is_admin.is_(True) #TODO: исправить костыль
+            User.is_admin.is_(True)
         ).all()
         return len(tokens_list) > 0
 
@@ -130,7 +130,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def get_token_id(self, token: str) -> int:  # получение id по токену
         tokens_user = self.session.query(User.id, User.access_token).filter(
             User.access_token == token.strip("\"")
-        ).first() #TODO: исправить кавычки
+        ).first()
         if tokens_user is not None:
             print(f"id of token {tokens_user.id}")
             return tokens_user.id

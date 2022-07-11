@@ -40,3 +40,13 @@ class User(Base):  # модель базы данных пользователе
         self.hashed_password = hashed_password
         self.is_active = is_active
         self.access_token = access_token
+
+    def get_dict(self) -> dict:
+        returning_dict = {
+            "is_admin": self.is_admin,
+            "name": self.name,
+            "hashed_password": self.hashed_password,
+            "is_active": self.is_active,
+            "access_token": self.access_token,
+        }
+        return returning_dict

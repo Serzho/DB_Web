@@ -1,4 +1,5 @@
-import requests.exceptions
+
+from requests.exceptions import ConnectionError
 
 from admin_commands import *
 
@@ -15,7 +16,7 @@ server_connected = False
 
 try:
     server_connected = bool(test_request())
-except requests.exceptions.ConnectionError:
+except ConnectionError:
     print("Server is not connected!!!")
 
 if server_connected:  # проверка работы сервера
@@ -41,4 +42,3 @@ if server_connected:  # проверка работы сервера
             is_running = False
         else:
             print("Wrong command!!! To see available commands print /help.")
-
