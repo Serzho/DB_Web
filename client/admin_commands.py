@@ -3,7 +3,7 @@ import json
 import requests
 
 
-def print_help():  # вывод сообщения с доступными командами
+def print_help(*params):  # вывод сообщения с доступными командами
     text = "\nPrint '/help' to get help.\n/test - test connection to the server\n/auth [username] [password] - " \
            "authentication to the server\n/get_users - print dictionary with users from database\n/add_user [name] [" \
            "password] [is_admin] - adding new user to the database with users\n" \
@@ -12,7 +12,7 @@ def print_help():  # вывод сообщения с доступными ко�
     print(text)
 
 
-def test_request():  # проверка доступа к серверу
+def test_request(*params):  # проверка доступа к серверу
     print("Trying to connect...")
     response = requests.get('http://127.0.0.1:9999/test')
     if bool(response.text):
@@ -22,7 +22,9 @@ def test_request():  # проверка доступа к серверу
     return response.text
 
 
-def auth(name=None, password=None):  # запрос аутентификации
+def auth(params):  # запрос аутентификации
+    name, password = params[:2]
+    print(f"Auth user {name} with password {password}")
     if password is not None:
         response = requests.post('http://127.0.0.1:9999/auth/', json={"name": name, "password": password})
         if response.text == '""': #TODO: найти проблему с кавычками

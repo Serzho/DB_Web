@@ -28,4 +28,4 @@ class TokensController(Thread):  # контроллер созданных то�
                     print(f"Token deleted! Id: {id_token}, Delta: {delta.seconds}")
 
         self.db_users_controller.clear_access_tokens()  # очистка всех токенов при выходе
-        print("Stopped tokens controller!!!")
+

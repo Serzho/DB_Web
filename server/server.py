@@ -28,7 +28,7 @@ async def auth(auth_info: Auth_request) -> str:
     # print(auth_info.name, auth_info.password)
     # получение токена и id пользователя
     id_user, token = db_users_controller.auth_user(auth_info.name, auth_info.password)
-    if id_user == -1:
+    if id_user is None:
         return ""
     else:
         return token

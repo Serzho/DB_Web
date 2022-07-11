@@ -57,30 +57,28 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def auth_user(self, auth_name: str, auth_password: str) -> (int, str):  # аутентификация пользователя
         hashed_auth_password = hashlib.md5(auth_password.encode()).hexdigest()  # хэширование пароля
         print(f"Try to sign in: {auth_name}, {auth_password}")
+        id_auth_user, token = None, None
         query_names = self.session.query(User).all()
-        id_auth_user = -1 #TODO: убрать этот бред
         for user in query_names:  # проход по списку пользователей
-            if user.name == auth_name and user.hashed_password == hashed_auth_password: #TODO: не работать с индексами
+            if user.name == auth_name and user.hashed_password == hashed_auth_password:
                 id_auth_user = user.id
-        token = ""
-        if id_auth_user == -1:
-            print("Incorrect name or password!")
+                print("Correct!")
+                print("Creating access token...")
+                token = self.create_token(id_auth_user)  # создание токена доступа
+                # добавление токена в словарь контроллера токенов
+                self.tokens_controller.tokens_time.update({id_auth_user: datetime.now()})
+                print("Token successfully created!")
+                break
         else:
-            print("Correct!")
-            print("Creating access token...")
-            token = self.create_token(id_auth_user)  # создание токена доступа
-            # добавление токена в словарь контроллера токенов
-            self.tokens_controller.tokens_time.update({id_auth_user: datetime.now()})
-            print("Token successfully created!")
-
+            print("Incorrect name or password!")
         return id_auth_user, token
 
     def create_token(self, id_auth: int) -> str:  # функция создания токена
-        token = secrets.token_hex(16)  # получение случайного значения #TODO: исправить безопасность генерации токена
-        print(id_auth)
+        token = secrets.token_hex(16)  # получение случайного значения
+        print(f"Id of token {id_auth}")
         users = self.session.query(User).all()
         for user in users:
-            if user.id == id_auth:
+            if user.id != id_auth:
                 continue
             print(user, type(user))
             user.is_active = True  # измение статуса соединения на "активное"
@@ -90,20 +88,23 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         return token
 
     def delete_token(self, id_token: int):
-        user = self.session.query(User).filter(User.id == id_token).first()
-        user.is_active = False
-        user.access_token = ""
-        temp = self.tokens_controller.tokens_time.get(id_token)
-        del temp #TODO: переделать
-        self.session.commit()
+        query_names = self.session.query(User).all()
+        for user in query_names:
+            if user.id == id_token:
+                user.is_active = False
+                user.access_token = ""
+                del self.tokens_controller.tokens_time[id_token]
+                self.session.commit()
+                break
 
     def stop_tokens_controller(self):  # функция остановки контроллера токенов
         self.tokens_controller.is_running = False
-        self.tokens_controller.join() #TODO: проверить нужно ли это
+        self.tokens_controller.join()
+        print("Stopped tokens controller!!!")
 
     def check_token_exists(self, token) -> bool:  # функция проверки существования токена
-        tokens_list = self.session.query(User.access_token).filter(User.access_token == token.strip("\"")).all()
-        return len(tokens_list) > 0 #TODO: переделать под count()
+        tokens_list = self.session.query(User.access_token).filter(User.access_token == token.strip("\"")).count()
+        return bool(tokens_list > 0)
 
     def get_users_dict(self) -> list:  # функция получения списка всех пользователей
         returning_dict = []
@@ -125,13 +126,18 @@ class DB_Users_Controller:  # класс контроллера базы дан�
             self.delete_token(User.id)
 
     def get_token_id(self, token: str) -> int:  # получение id по токену
-        tokens_list = self.session.query(User.id, User.access_token).filter(
-            User.access_token == token.strip("\"")).first() #TODO: исправить работу с индексами, кавычки
-        print(f"id of token {list(tokens_list)[0]}")
-        return list(tokens_list)[0] #TODO: сделать перепроверку существования
+        tokens_user = self.session.query(User.id, User.access_token).filter(
+            User.access_token == token.strip("\"")
+        ).first() #TODO: исправить кавычки
+        if tokens_user is not None:
+            print(f"id of token {tokens_user.id}")
+            return tokens_user.id
 
     def delete_user(self, id_user):  # функция удаления пользователя
         self.delete_token(id_user)  # удаление токена доступа пользователя
-        user = self.session.query(User).filter(User.id == id_user)
-        user.delete() #TODO: попробовать удалить с помощью метода session
-        self.session.commit()
+        query_names = self.session.query(User).filter(User.id == id_user)
+        for user in query_names:
+            if user.id == id_user:
+                self.session.delete(user)
+                self.session.commit()
+                break
