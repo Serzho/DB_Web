@@ -31,15 +31,14 @@ class User(Base):  # модель базы данных пользователе
         "is_active",
         sqlalchemy.Boolean(),
     )
-    access_token = sqlalchemy.Column("access_token", sqlalchemy.String(32))  #  токен доступа
 
 
-    def __init__(self, is_admin: bool, name: str, hashed_password: str, is_active: bool, access_token: str):
+
+    def __init__(self, is_admin: bool, name: str, hashed_password: str, is_active: bool):
         self.is_admin = is_admin
         self.name = name
         self.hashed_password = hashed_password
         self.is_active = is_active
-        self.access_token = access_token
 
     def get_dict(self) -> dict:
         returning_dict = {
@@ -48,5 +47,25 @@ class User(Base):  # модель базы данных пользователе
             "hashed_password": self.hashed_password,
             "is_active": self.is_active,
             "access_token": self.access_token,
+        }
+        return returning_dict
+
+
+class Token(Base):
+    __tablename__ = 'token'
+    id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True)  # id (номер) пользователя
+    access_token = sqlalchemy.Column("access_token", sqlalchemy.String(32))  # токен доступа
+    time_creation = sqlalchemy.Column("time_creation", sqlalchemy.Integer)
+
+    def __init__(self, id: int, access_token: str, time_creation: int):
+        self.id = id
+        self.access_token = access_token
+        self.time_creation = time_creation
+
+    def get_dict(self) -> dict:
+        returning_dict = {
+            "id": self.id,
+            "access_token": self.access_token,
+            "time_creation": self.time_creation,
         }
         return returning_dict

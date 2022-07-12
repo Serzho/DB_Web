@@ -24,10 +24,7 @@ if server_connected:  # проверка работы сервера
     print("Waiting for command...")
     print_help()  # вывод сообщения с доступными командами
     while is_running:
-        command_input = input().split()
-        command_input.append('')
-        command_input.append('')
-        command_input.append(token)
+        command_input = [*input().split(), '', '', token]
         # разделение ввода на команду и параметры
         params = command_input[1:]
         command_input = command_input[0]

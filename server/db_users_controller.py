@@ -4,7 +4,7 @@ from getpass import getpass
 import sqlalchemy
 from sqlalchemy.orm import *
 
-from db_users_create import User, db_users_loaded, Base
+from db_users_create import User, db_users_loaded, Base, Token
 import secrets
 from tokens_controller import TokensController
 from datetime import datetime
@@ -47,7 +47,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def add_user(self, name: str, password: str, is_admin=False,
                  is_active=False):  # создание нового пользователя
         hashed_password = hashlib.md5(password.encode()).hexdigest()  # хэширование пароля
-        user = User(is_admin, name, hashed_password, is_active, access_token="")
+        user = User(is_admin, name, hashed_password, is_active)
         self.session.add(user)  # добавление пользователя в сессию
         # for el in db.session:
         #     print(el)
@@ -64,13 +64,22 @@ class DB_Users_Controller:  # класс контроллера базы дан�
                 print("Correct!")
                 print("Creating access token...")
                 token = self.create_token(id_auth_user)  # создание токена доступа
-                # добавление токена в словарь контроллера токенов
-                self.tokens_controller.tokens_time.update({id_auth_user: datetime.now()})
                 print("Token successfully created!")
                 break
         else:
             print("Incorrect name or password!")
         return id_auth_user, token
+
+    def get_int_datetime(self):
+        time = datetime.now().time()
+        out_time = time.hour * 3600 + time.minute * 60 + time.second
+        return out_time
+
+    def get_tokens(self):
+        tokens_list = []
+        for row in self.session.query(Token).all():
+            tokens_list.append(row.get_dict())
+        return tokens_list
 
     def create_token(self, id_auth: int) -> str:  # функция создания токена
         token = secrets.token_hex(16)  # получение случайного значения
@@ -81,7 +90,9 @@ class DB_Users_Controller:  # класс контроллера базы дан�
                 continue
             print(user, type(user))
             user.is_active = True  # измение статуса соединения на "активное"
-            user.access_token = token  # добавление токена
+            token_row = Token(id_auth, token, self.get_int_datetime())
+            self.session.add(token_row)
+            self.session.commit()
         self.session.commit()  # коммит изменений
 
         return token
@@ -91,9 +102,9 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         for user in query_names:
             if user.id == id_token:
                 user.is_active = False
-                user.access_token = ""
-                deleting_el = self.tokens_controller.tokens_time.get(id_token)
-                del deleting_el
+                token_row = self.session.query(Token).filter(Token.id == id_token).first()
+                if token_row is not None:
+                    self.session.delete(token_row)
                 self.session.commit()
                 break
 
