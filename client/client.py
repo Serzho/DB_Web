@@ -8,7 +8,7 @@ from admin_commands import *
 commands_dict = {
     "/help": print_help, "/test": test_request, "/auth": auth, "/test_token": test_token,
     "/get_users": get_users, "/add_user": add_user, "/delete_user": delete_user,
-    "/log_out": log_out
+    "/log_out": log_out, "/delay": get_delay
 }  # словарь доступных команд
 
 token = ''
@@ -34,7 +34,7 @@ if server_connected:  # проверка работы сервера
             if function_return is not None:
                 token = function_return
         elif command_input == "/exit":
-            log_out(token)
+            log_out(params)
             print("Exiting the program...")
             is_running = False
         else:

@@ -19,8 +19,8 @@ class TokensController(Thread):  # контроллер созданных то�
             current_time = datetime.now().time()  # получение текущего времени
             seconds_current_time = current_time.hour * 3600 + current_time.minute * 60 + current_time.second
             tokens_list = self.db_users_controller.get_tokens()
-            if len(tokens_list) > 0:
-                print(tokens_list)  # вывод словаря с токенами
+            # if len(tokens_list) > 0:
+            #     print(tokens_list)  # вывод словаря с токенами
             for token_dict in tokens_list:
                 delta = seconds_current_time - token_dict.get("time_creation")  # разница текущего времени и времени создания
                 # print(f"Delta time: {delta}")

@@ -1,3 +1,4 @@
+import datetime
 import json
 
 import requests
@@ -8,12 +9,17 @@ def print_help(*params):  # вывод сообщения с доступным�
            "authentication to the server\n/get_users - print dictionary with users from database\n/add_user [name] [" \
            "password] [is_admin] - adding new user to the database with users\n" \
            "/delete_user [id] - deleting user from " \
-           "database with users\n/log_out - log out from the current user\n/exit - exit the program "
+           "database with users\n/log_out - log out from the current user\n/exit - exit the program\n/delay - get request delay to server "
     print(text)
 
 
 # TODO: Изменить адрес и порт на переменные
 
+def get_delay(*params):
+    starting_time = datetime.datetime.now()
+    test_request()
+    delta = datetime.datetime.now() - starting_time
+    print(f"Delay: {delta.microseconds // 1000} ms")
 
 def test_request(*params):  # проверка доступа к серверу
     print("Trying to connect...")
@@ -23,7 +29,6 @@ def test_request(*params):  # проверка доступа к серверу
     else:
         print("Invalid request to server...")
     return response.text
-
 
 def auth(params):  # запрос аутентификации
     name, password = params[:2]
