@@ -4,8 +4,8 @@ from requests.exceptions import ConnectionError
 from admin_commands import *
 
 # главный исполняемый файл клиента
-
-commands_dict = {
+#TODO:отформатировать файлы
+commands_dict = { #TODO: переделать
     "/help": print_help, "/test": test_request, "/auth": auth, "/test_token": test_token,
     "/get_users": get_users, "/add_user": add_user, "/delete_user": delete_user,
     "/log_out": log_out, "/delay": get_delay
@@ -24,7 +24,7 @@ if server_connected:  # проверка работы сервера
     print("Waiting for command...")
     print_help()  # вывод сообщения с доступными командами
     while is_running:
-        command_input = [*input().split(), '', '', token]
+        command_input = [*input().split(), '', '', token] #TODO: исправить костылек
         # разделение ввода на команду и параметры
         params = command_input[1:]
         command_input = command_input[0]
@@ -36,6 +36,6 @@ if server_connected:  # проверка работы сервера
         elif command_input == "/exit":
             log_out(params)
             print("Exiting the program...")
-            is_running = False
+            is_running = False #TODO: убрать флаг
         else:
             print("Wrong command!!! To see available commands print /help.")

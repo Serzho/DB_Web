@@ -5,6 +5,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+#TODO: закинуть это в служебное и убрать такой бред отсюда
+#TODO: переделтаь под модуль PATH
 # проверка существования базы данных
 if not os.path.exists("tmp/database.db"):
     with open("tmp/database.db", "wb") as f:
@@ -27,14 +29,14 @@ class User(Base):  # модель базы данных пользователе
     is_admin = sqlalchemy.Column("is_admin", sqlalchemy.Boolean)  # наличие прав администратора
     name = sqlalchemy.Column("name", sqlalchemy.String(100))  # имя пользователя
     hashed_password = sqlalchemy.Column("hashed_password", sqlalchemy.String(32))  # пароль в хешируемом виде
-    is_active = sqlalchemy.Column(  # есть ли созданный токен (активно ли подключение пользователя)
+    is_active = sqlalchemy.Column(  # есть ли созданный токен (активно ли подключение пользователя) #TODO: бесполезно, убрать
         "is_active",
         sqlalchemy.Boolean(),
     )
 
 
 
-    def __init__(self, is_admin: bool, name: str, hashed_password: str, is_active: bool):
+    def __init__(self, is_admin: bool, name: str, hashed_password: str, is_active: bool): #TODO: проверить нужно ли это
         self.is_admin = is_admin
         self.name = name
         self.hashed_password = hashed_password
@@ -55,9 +57,9 @@ class Token(Base):
     __tablename__ = 'token'
     id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True)  # id (номер) пользователя
     access_token = sqlalchemy.Column("access_token", sqlalchemy.String(32))  # токен доступа
-    time_creation = sqlalchemy.Column("time_creation", sqlalchemy.Integer)
+    time_creation = sqlalchemy.Column("time_creation", sqlalchemy.Integer) #TODO: переделать на дейттайм
 
-    def __init__(self, id: int, access_token: str, time_creation: int):
+    def __init__(self, id: int, access_token: str, time_creation: int): #TODO: нужно ли это?
         self.id = id
         self.access_token = access_token
         self.time_creation = time_creation

@@ -4,7 +4,7 @@ import json
 import requests
 
 
-def print_help(*params):  # вывод сообщения с доступными командами
+def print_help(*params):  # вывод сообщения с доступными командами #TODO: сделать нормальный перенос
     text = "\nPrint '/help' to get help.\n/test - test connection to the server\n/auth [username] [password] - " \
            "authentication to the server\n/get_users - print dictionary with users from database\n/add_user [name] [" \
            "password] [is_admin] - adding new user to the database with users\n" \
@@ -14,7 +14,10 @@ def print_help(*params):  # вывод сообщения с доступным�
 
 
 # TODO: Изменить адрес и порт на переменные
-
+#TODO: переписать функции под нужные параметры
+#TODO: переписать возвращаемые значения
+#TODO: указать типы
+#TODO: исправить бред с индексами
 def get_delay(*params):
     starting_time = datetime.datetime.now()
     test_request()
@@ -24,7 +27,7 @@ def get_delay(*params):
 def test_request(*params):  # проверка доступа к серверу
     print("Trying to connect...")
     response = requests.get('http://127.0.0.1:9999/test')
-    if bool(response.text):
+    if bool(response.text): #TODO: проверить это
         print("Successful request to server!!!")
     else:
         print("Invalid request to server...")
@@ -48,7 +51,7 @@ def auth(params):  # запрос аутентификации
 
 def test_token(token):  # проверка токена доступа
     response = requests.get("http://127.0.0.1:9999/test_token", json={"token": token})
-    if bool(response):
+    if bool(response): #TODO: проверить это
         print("Correct access token!")
     else:
         print("Incorrect access token!")

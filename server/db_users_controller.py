@@ -1,6 +1,6 @@
 import hashlib
 from getpass import getpass
-
+#TODO: исправить порядок модулей
 import sqlalchemy
 from sqlalchemy.orm import *
 
@@ -10,10 +10,15 @@ from tokens_controller import TokensController
 from datetime import datetime
 
 
-class DB_Users_Controller:  # класс контроллера базы данных пользователя
+class DB_Users_Controller:  # класс контроллера базы данных пользователя #TODO: название переделать
     session = None
     tokens_controller = None
 
+    # TODO: разделить на несколько классов
+    # TODO: закинуть служебные функции в отдельные
+    # TODO: исправить названия
+    # TODO: исправить ошибки в английских словах
+    # TODO: сделать нормальный формат
     def __init__(self):
         print("Creating users table...")
         engine = sqlalchemy.create_engine(
@@ -30,6 +35,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         # self.get()
 
     def create_main_admin(self):  # создание первого администратора
+        # TODO: непонятно ничего, исправить
         print("Please, create admin profile: ")
         while True:  # защищенный ввод пароля с проверкой
             print("\nEnter the password: ")
@@ -48,7 +54,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
                  is_active=False):  # создание нового пользователя
         hashed_password = hashlib.md5(password.encode()).hexdigest()  # хэширование пароля
         user = User(is_admin, name, hashed_password, is_active)
-        self.session.add(user)  # добавление пользователя в сессию
+        self.session.add(user)  # добавление пользователя в сессию #TODO: закинуть в трай
         # for el in db.session:
         #     print(el)
         self.session.commit()  # коммит с новым пользователем в базу данных
@@ -57,7 +63,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         hashed_auth_password = hashlib.md5(auth_password.encode()).hexdigest()  # хэширование пароля
         print(f"Try to sign in: {auth_name}, {auth_password}")
         id_auth_user, token = None, None
-        query_names = self.session.query(User).all()
+        query_names = self.session.query(User).all() #TODO: переписать идиотизм
         for user in query_names:  # проход по списку пользователей
             if user.name == auth_name and user.hashed_password == hashed_auth_password:
                 id_auth_user = user.id
@@ -70,7 +76,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
             print("Incorrect name or password!")
         return id_auth_user, token
 
-    def get_int_datetime(self):
+    def get_int_datetime(self): #TODO: боже, выкини это
         time = datetime.now().time()
         out_time = time.hour * 3600 + time.minute * 60 + time.second
         return out_time
@@ -84,21 +90,21 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def create_token(self, id_auth: int) -> str:  # функция создания токена
         token = secrets.token_hex(16)  # получение случайного значения
         print(f"Id of token {id_auth}")
-        users = self.session.query(User).all()
+        users = self.session.query(User).all() #TODO: выбрать только то, что нужно
         for user in users:
             if user.id != id_auth:
                 continue
             print(user, type(user))
             user.is_active = True  # измение статуса соединения на "активное"
             token_row = Token(id_auth, token, self.get_int_datetime())
-            self.session.add(token_row)
+            self.session.add(token_row) #TODO: засунуть в трай
             self.session.commit()
         self.session.commit()  # коммит изменений
 
         return token
 
     def delete_token(self, id_token: int):
-        query_names = self.session.query(User).all()
+        query_names = self.session.query(User).all() #TODO: переписать
         for user in query_names:
             if user.id == id_token:
                 user.is_active = False
@@ -116,7 +122,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
     def check_token_exists(self, token) -> bool:  # функция проверки существования токена
         print(f"Cheking token {token}...")
         tokens_list = self.session.query(User.access_token).filter(User.access_token == token.strip("\"")).count()
-        return bool(tokens_list > 0) and token != ''
+        return bool(tokens_list > 0) and token != '' #TODO: тоже переписать это
 
     def get_users_dict(self) -> list:  # функция получения списка всех пользователей
         returning_dict = []
@@ -131,7 +137,7 @@ class DB_Users_Controller:  # класс контроллера базы дан�
             User.access_token == token.strip("\""),
             User.is_admin.is_(True)
         ).all()
-        return len(tokens_list) > 0
+        return len(tokens_list) > 0 #TODO: переписать
 
     def clear_access_tokens(self):  # функция удаления всех токенов доступа
         for user in self.session.query(User).all():
@@ -151,6 +157,6 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         query_names = self.session.query(User).filter(User.id == id_user)
         for user in query_names:
             if user.id == id_user:
-                self.session.delete(user)
+                self.session.delete(user) #TODO: закинуть в трай
                 self.session.commit()
                 break

@@ -10,7 +10,7 @@ print("Starting_server...")
 db_users_controller = DB_Users_Controller()  # инициализация контроллера базы данных пользователей
 app = FastAPI()  # создание приложения fast_api
 
-
+#TODO: переделать возвращаемые значения, сделать проверки
 @app.get("/test")  # тестовый запрос наличия запущенного сервера
 async def test() -> bool:
     print("TEST")
