@@ -27,8 +27,8 @@ class User(Base):  # модель базы данных пользователе
     __tablename__ = 'user'
     id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True)  # id (номер) пользователя
     is_admin = sqlalchemy.Column("is_admin", sqlalchemy.Boolean)  # наличие прав администратора
-    name = sqlalchemy.Column("name", sqlalchemy.String(100))  # имя пользователя
-    hashed_password = sqlalchemy.Column("hashed_password", sqlalchemy.String(32))  # пароль в хешируемом виде
+    name = sqlalchemy.Column("name", sqlalchemy.String(100))  # имя пользователя#TODO: проверить ограничение
+    hashed_password = sqlalchemy.Column("hashed_password", sqlalchemy.String(32))  # пароль в хешируемом виде #TODO: вынести константы
     is_active = sqlalchemy.Column(  # есть ли созданный токен (активно ли подключение пользователя) #TODO: бесполезно, убрать
         "is_active",
         sqlalchemy.Boolean(),
