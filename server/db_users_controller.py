@@ -121,23 +121,40 @@ class DB_Users_Controller:  # класс контроллера базы дан�
 
     def check_token_exists(self, token) -> bool:  # функция проверки существования токена
         print(f"Cheking token {token}...")
-        tokens_list = self.session.query(User.access_token).filter(User.access_token == token.strip("\"")).count()
-        return bool(tokens_list > 0) and token != '' #TODO: тоже переписать это
+        tokens_list = self.session.query(
+            Token.access_token
+        ).filter(
+            Token.access_token == token.strip("\"")
+        ).count()
+        return bool(tokens_list > 0) and token != ''
 
-    def get_users_dict(self) -> list:  # функция получения списка всех пользователей
-        returning_dict = []
+    def get_users_list(self) -> list:  # функция получения списка всех пользователей
+        returning_list = []
         for row in self.session.query(User).all():  # проход по всем строкам в базе данных
             print(type(row))
-            returning_dict.append(row.get_dict())  # добавление строк из базы данных в виде словаря в выходной список
+            user_dict = row.get_dict()
+            token = self.session.query(Token).filter(
+                    Token.id == row.id
+            ).first()
+            if token is not None:
+                user_dict.update({"access_token": token.access_token, "time_creation": token.time_creation})
+            returning_list.append(user_dict)
+
         # print(returning_dict)
-        return returning_dict
+        return returning_list
 
     def check_token_admin(self, token: str) -> bool:  # проверка токена на права доступа администратора
-        tokens_list = self.session.query(User.access_token, User.is_admin).filter(
-            User.access_token == token.strip("\""),
-            User.is_admin.is_(True)
+        token = self.session.query(
+            Token.access_token, Token.id
+        ).filter(
+            Token.access_token == token.strip("\""),
+        ).first()
+        admins_list = self.session.query(
+            User.id, User.is_admin
+        ).filter(
+            User.is_admin.is_(True), User.id == token.id
         ).all()
-        return len(tokens_list) > 0 #TODO: переписать
+        return bool(admins_list)
 
     def clear_access_tokens(self):  # функция удаления всех токенов доступа
         for user in self.session.query(User).all():
@@ -145,8 +162,10 @@ class DB_Users_Controller:  # класс контроллера базы дан�
             self.delete_token(user.id)
 
     def get_token_id(self, token: str) -> int:  # получение id по токену
-        tokens_user = self.session.query(User.id, User.access_token).filter(
-            User.access_token == token.strip("\"")
+        tokens_user = self.session.query(
+            Token.id, Token.access_token
+        ).filter(
+            Token.access_token == token.strip("\"")
         ).first()
         if tokens_user is not None:
             print(f"id of token {tokens_user.id}")

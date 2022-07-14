@@ -1,41 +1,31 @@
 
 from requests.exceptions import ConnectionError
 
-from admin_commands import *
+from commands_handler import *
 
 # главный исполняемый файл клиента
 #TODO:отформатировать файлы
-commands_dict = { #TODO: переделать
-    "/help": print_help, "/test": test_request, "/auth": auth, "/test_token": test_token,
-    "/get_users": get_users, "/add_user": add_user, "/delete_user": delete_user,
-    "/log_out": log_out, "/delay": get_delay
-}  # словарь доступных команд
 
-token = ''
+commandHandler = CommandHandler()
+
 server_connected = False
 
 try:
-    server_connected = bool(test_request())
+    server_connected = bool(commandHandler.test_request())
 except ConnectionError:
     print("Server is not connected!!!")
 
 if server_connected:  # проверка работы сервера
     is_running = True
     print("Waiting for command...")
-    print_help()  # вывод сообщения с доступными командами
-    while is_running:
-        command_input = [*input().split(), '', '', token] #TODO: исправить костылек
-        # разделение ввода на команду и параметры
-        params = command_input[1:]
-        command_input = command_input[0]
-        # print(command_input, params)
-        if command_input in commands_dict.keys():
-            function_return = commands_dict.get(command_input)(params)
-            if function_return is not None:
-                token = function_return
-        elif command_input == "/exit":
-            log_out(params)
+    commandHandler.print_help()  # вывод сообщения с доступными командами
+    while True:
+        command_input = commandHandler.input_command()
+        if command_input.get("command") in commandHandler.commands_dict.keys():
+            commandHandler.run_command(command_input)
+        elif command_input.get("command") == "/exit":
+            commandHandler.log_out()
             print("Exiting the program...")
-            is_running = False #TODO: убрать флаг
+            break
         else:
-            print("Wrong command!!! To see available commands print /help.")
+            print('Invalid command!!! Please write "/help" for a list of available commands')

@@ -4,7 +4,7 @@ import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
-
+NAME_MAX_LENGTH = 100
 #TODO: закинуть это в служебное и убрать такой бред отсюда
 #TODO: переделтаь под модуль PATH
 # проверка существования базы данных
@@ -27,7 +27,7 @@ class User(Base):  # модель базы данных пользователе
     __tablename__ = 'user'
     id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True)  # id (номер) пользователя
     is_admin = sqlalchemy.Column("is_admin", sqlalchemy.Boolean)  # наличие прав администратора
-    name = sqlalchemy.Column("name", sqlalchemy.String(100))  # имя пользователя#TODO: проверить ограничение
+    name = sqlalchemy.Column("name", sqlalchemy.String(NAME_MAX_LENGTH))  # имя пользователя#TODO: проверить ограничение
     hashed_password = sqlalchemy.Column("hashed_password", sqlalchemy.String(32))  # пароль в хешируемом виде #TODO: вынести константы
     is_active = sqlalchemy.Column(  # есть ли созданный токен (активно ли подключение пользователя) #TODO: бесполезно, убрать
         "is_active",
@@ -44,11 +44,11 @@ class User(Base):  # модель базы данных пользователе
 
     def get_dict(self) -> dict:
         returning_dict = {
+            "id": self.id,
             "is_admin": self.is_admin,
             "name": self.name,
             "hashed_password": self.hashed_password,
             "is_active": self.is_active,
-            "access_token": self.access_token,
         }
         return returning_dict
 

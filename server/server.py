@@ -3,6 +3,7 @@ from fastapi import *
 from fastapi.responses import FileResponse
 import uvicorn
 from requests_models import *
+from db_users_create import NAME_MAX_LENGTH
 
 # главный исполняемый файл сервера
 
@@ -51,7 +52,7 @@ async def get_users(token_request: Standard_token_request):
     # проверка токена и прав доступа админа для совершения запроса
     if db_users_controller.check_token_exists(token_request.token) and db_users_controller.check_token_admin(
             token_request.token) and token_request.token != "":
-        return db_users_controller.get_users_dict()
+        return db_users_controller.get_users_list()
     else:
         print(f"Admin request with incorrect token!!! Token: {token_request.token}")
         print(f"Token exists: {db_users_controller.check_token_exists(token_request.token)}")
@@ -65,6 +66,9 @@ async def add_user(token_request: Adding_user_token_request) -> str:
     if db_users_controller.check_token_exists(token_request.token) and db_users_controller.check_token_admin(
             token_request.token):
         # вызов функции добавления нового пользователя
+        print(len(token_request.name))
+        if len(token_request.name) > NAME_MAX_LENGTH:
+            return "Incorrect name length (more than 100 characters)"
         db_users_controller.add_user(name=token_request.name,
                                      password=token_request.password, is_admin=token_request.is_admin == "True")
         return "Correct creation!"
