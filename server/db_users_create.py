@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 NAME_MAX_LENGTH = 100
 
-
+# TODO: сделать связь
 class User(Base):  # модель базы данных пользователей
     __tablename__ = 'user'
     id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True)  # id (номер) пользователя
@@ -31,7 +31,7 @@ class User(Base):  # модель базы данных пользователе
 
 class Token(Base):
     __tablename__ = 'token'
-    id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True)  # id (номер) пользователя
+    id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey('user.id'), primary_key=True)  # id (номер) пользователя
     access_token = sqlalchemy.Column("access_token", sqlalchemy.String(32))  # токен доступа
     time_creation = sqlalchemy.Column("time_creation", sqlalchemy.DateTime)
 

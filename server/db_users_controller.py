@@ -11,15 +11,14 @@ from datetime import datetime
 from pathlib import Path
 
 
-class DbUsersController:  # класс контроллера базы данных пользователя
+class DBUsersController:  # класс контроллера базы данных пользователя
     session = None
     tokens_controller = None
 
-    # TODO: разделить на несколько классов
-    # TODO: закинуть служебные функции в отдельные
     # TODO: исправить названия
     # TODO: исправить ошибки в английских словах
     # TODO: сделать нормальный формат
+    # TODO: сделать логирование
     def __init__(self):
         print("Creating users table...")
         db_exists = Path.exists(Path("tmp/database.db"))
@@ -32,9 +31,7 @@ class DbUsersController:  # класс контроллера базы данн�
             self.create_main_admin()
         self.tokens_controller = TokensController(self)  # создание контроллера токеов
         self.tokens_controller.start()  # запуск контроллера токенов
-        self.clear_access_tokens()  # очистка всех токенов при открытии базы данных
-
-        # self.get()
+        self.delete_all_tokens()  # очистка всех токенов при открытии базы данных
 
     def create_main_admin(self):  # создание первого администратора
         print("Please, create admin profile: ")
@@ -55,9 +52,7 @@ class DbUsersController:  # класс контроллера базы данн�
     def add_user(self, name: str, password: str, is_admin=False):  # создание нового пользователя
         hashed_password = hashlib.md5(password.encode()).hexdigest()  # хэширование пароля
         user = User(is_admin, name, hashed_password)
-        self.session.add(user)  # добавление пользователя в сессию #TODO: закинуть в трай
-        # for el in db.session:
-        #     print(el)
+        self.session.add(user)  # добавление пользователя в сессию
         self.session.commit()  # коммит с новым пользователем в базу данных
 
     def auth_user(self, auth_name: str, auth_password: str) -> (int, str):  # аутентификация пользователя
@@ -80,7 +75,7 @@ class DbUsersController:  # класс контроллера базы данн�
             print("Incorrect name or password!")
         return id_auth_user, token
 
-    def get_tokens_time(self):
+    def tokens_time(self):
         tokens_list = []
         for row in self.session.query(Token.id, Token.time_creation).all():
             tokens_list.append({"id": row.id, "time_creation": row.time_creation})
@@ -96,6 +91,9 @@ class DbUsersController:  # класс контроллера базы данн�
             print(user, type(user))
             time_creation = datetime.now()
             print(id_auth, token, time_creation)
+            last_user_token = self.session.query(Token).first()
+            if last_user_token is not None:
+                self.session.delete(last_user_token)
             token_row = Token(id_auth, token, time_creation)
             self.session.add(token_row)
             self.session.commit()
@@ -118,7 +116,7 @@ class DbUsersController:  # класс контроллера базы данн�
         self.tokens_controller.join()
         print("Stopped tokens controller!!!")
 
-    def check_token_exists(self, token) -> bool:  # функция проверки существования токена
+    def token_exists(self, token) -> bool:  # функция проверки существования токена
         print(f"Cheking token {token}...")
         tokens_list = self.session.query(
             Token.access_token
@@ -127,7 +125,7 @@ class DbUsersController:  # класс контроллера базы данн�
         ).count()
         return bool(tokens_list > 0) and token != ''
 
-    def get_users_list(self) -> list:  # функция получения списка всех пользователей
+    def users_list(self) -> list:  # функция получения списка всех пользователей
         returning_list = []
         for row in self.session.query(User).all():  # проход по всем строкам в базе данных
             print(type(row))
@@ -136,13 +134,13 @@ class DbUsersController:  # класс контроллера базы данн�
                 Token.id == row.id
             ).first()
             if token is not None:
-                user_dict.update({"access_token": token.access_token, "time_creation": token.time_creation})
+                user_dict.update({"access_token": token.access_token, "time_creation": str(token.time_creation)})
             returning_list.append(user_dict)
 
         # print(returning_dict)
         return returning_list
 
-    def check_token_admin(self, token: str) -> bool:  # проверка токена на права доступа администратора
+    def token_is_admin(self, token: str) -> bool:  # проверка токена на права доступа администратора
         token = self.session.query(
             Token.access_token, Token.id
         ).filter(
@@ -158,7 +156,7 @@ class DbUsersController:  # класс контроллера базы данн�
         ).all()
         return bool(admins_list)
 
-    def clear_access_tokens(self):  # функция удаления всех токенов доступа
+    def delete_all_tokens(self):  # функция удаления всех токенов доступа
         for user in self.session.query(User).all():
             print(f"Id of token to delete: {user.id} by clear_access_tokens")
             self.delete_token(user.id)
@@ -178,6 +176,6 @@ class DbUsersController:  # класс контроллера базы данн�
         query_names = self.session.query(User).filter(User.id == id_user)
         for user in query_names:
             if user.id == id_user:
-                self.session.delete(user)  # TODO: закинуть в трай
+                self.session.delete(user)
                 self.session.commit()
                 break
