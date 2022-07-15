@@ -9,10 +9,10 @@ class User(Base):  # модель базы данных пользователе
     __tablename__ = 'user'
     id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True)  # id (номер) пользователя
     is_admin = sqlalchemy.Column("is_admin", sqlalchemy.Boolean)  # наличие прав администратора
-    name = sqlalchemy.Column("name", sqlalchemy.String(NAME_MAX_LENGTH))  # имя пользователя#TODO: проверить ограничение
-    hashed_password = sqlalchemy.Column("hashed_password", sqlalchemy.String(32))  # пароль в хешируемом виде #TODO: вынести константы
+    name = sqlalchemy.Column("name", sqlalchemy.String(NAME_MAX_LENGTH))  # имя пользователя
+    hashed_password = sqlalchemy.Column("hashed_password", sqlalchemy.String(32))  # пароль в хешируемом виде
 
-    def __init__(self, is_admin: bool, name: str, hashed_password: str): #TODO: проверить нужно ли это
+    def __init__(self, is_admin: bool, name: str, hashed_password: str):
         self.is_admin = is_admin
         self.name = name
         self.hashed_password = hashed_password

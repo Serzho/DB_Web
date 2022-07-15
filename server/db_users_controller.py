@@ -108,7 +108,7 @@ class DbUsersController:  # класс контроллера базы данн�
         return token
 
     def delete_token(self, id_token: int):
-        query_names = self.session.query(User).all()  # TODO: переписать
+        query_names = self.session.query(User.id).all()
         for user in query_names:
             if user.id == id_token:
                 token_row = self.session.query(Token).filter(Token.id == id_token).first()
