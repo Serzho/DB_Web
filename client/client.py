@@ -5,7 +5,7 @@ from commands_handler import *
 
 # главный исполняемый файл клиента
 
-commandHandler = CommandHandler()
+commandHandler = CommandsHandler()
 
 server_connected = False
 

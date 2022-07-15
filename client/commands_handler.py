@@ -3,7 +3,7 @@ import json
 import requests
 
 
-class CommandHandler:
+class CommandsHandler:
     commands_dict = None
     token = None
     ip = None
@@ -25,8 +25,12 @@ class CommandHandler:
             "/delay": {"f_name": self.get_delay, "argv": ()}
         }  # словарь доступных команд
 
-    def input_command(self) -> {str: list}:
-        input_string = input().split()
+    def input_command(self, unit_test_input = None) -> {str: list}:
+        if unit_test_input is None:
+            input_string = input().split()
+        else:
+            input_string = unit_test_input.split()
+
         if input_string:
             user_input = {"command": input_string.pop(0)}
             if len(input_string):
@@ -36,6 +40,8 @@ class CommandHandler:
             print(user_input.get("command"), user_input.get("argv"))
         else:
             user_input = {"command": "empty"}
+        if unit_test_input is not None:
+            self.run_command(user_input)
         return user_input
 
     def run_command(self, user_input: {str: list}):
@@ -77,7 +83,7 @@ class CommandHandler:
 
     def auth(self, name: str, password: str):  # запрос аутентификации
         print(f"Auth user {name} with password {password}")
-        if password is not "password":
+        if password != "password":
             response = requests.get(
                 f'http://{self.ip}:{self.port}/auth/',
                 json={"name": name, "password": password}

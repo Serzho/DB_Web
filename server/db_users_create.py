@@ -1,3 +1,5 @@
+import datetime
+
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -31,9 +33,9 @@ class Token(Base):
     __tablename__ = 'token'
     id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True)  # id (номер) пользователя
     access_token = sqlalchemy.Column("access_token", sqlalchemy.String(32))  # токен доступа
-    time_creation = sqlalchemy.Column("time_creation", sqlalchemy.Integer) #TODO: переделать на дейттайм
+    time_creation = sqlalchemy.Column("time_creation", sqlalchemy.DateTime)
 
-    def __init__(self, id: int, access_token: str, time_creation: int): #TODO: нужно ли это?
+    def __init__(self, id: int, access_token: str, time_creation: datetime):
         self.id = id
         self.access_token = access_token
         self.time_creation = time_creation

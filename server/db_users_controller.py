@@ -80,15 +80,10 @@ class DbUsersController:  # класс контроллера базы данн�
             print("Incorrect name or password!")
         return id_auth_user, token
 
-    def get_int_datetime(self):  # TODO: боже, выкини это
-        time = datetime.now().time()
-        out_time = time.hour * 3600 + time.minute * 60 + time.second
-        return out_time
-
-    def get_tokens(self):
+    def get_tokens_time(self):
         tokens_list = []
-        for row in self.session.query(Token).all():
-            tokens_list.append(row.get_dict())
+        for row in self.session.query(Token.id, Token.time_creation).all():
+            tokens_list.append({"id": row.id, "time_creation": row.time_creation})
         return tokens_list
 
     def create_token(self, id_auth: int) -> str:  # функция создания токена
@@ -99,8 +94,9 @@ class DbUsersController:  # класс контроллера базы данн�
             if user.id != id_auth:
                 continue
             print(user, type(user))
-            print(id_auth, token, self.get_int_datetime())
-            token_row = Token(id_auth, token, self.get_int_datetime())
+            time_creation = datetime.now()
+            print(id_auth, token, time_creation)
+            token_row = Token(id_auth, token, time_creation)
             self.session.add(token_row)
             self.session.commit()
         self.session.commit()  # коммит изменений

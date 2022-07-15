@@ -16,15 +16,14 @@ class TokensController(Thread):  # контроллер созданных то�
         print("Starting tokens controller...")
         while self.is_running:
             sleep(15)  # задержка 15 секунд между проверками
-            current_time = datetime.now().time()  # получение текущего времени
-            seconds_current_time = current_time.hour * 3600 + current_time.minute * 60 + current_time.second
-            tokens_list = self.db_users_controller.get_tokens()
+            current_time = datetime.now()  # получение текущего времени
+            tokens_list = self.db_users_controller.get_tokens_time()
             # if len(tokens_list) > 0:
             #     print(tokens_list)  # вывод словаря с токенами
             for token_dict in tokens_list:
-                delta = seconds_current_time - token_dict.get("time_creation")  # разница текущего времени и времени создания
+                delta = current_time - token_dict.get("time_creation")  # разница текущего времени и времени создания
                 # print(f"Delta time: {delta}")
-                if delta > 300:
+                if delta.seconds > 300:
                     self.db_users_controller.delete_token(token_dict.get("id"))  # удаление после 5 минут с момента создания токена
                     print(f"Token deleted! Id: {token_dict.get('id')}, Delta: {delta}")
 
