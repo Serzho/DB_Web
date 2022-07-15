@@ -1,6 +1,8 @@
+import fastapi.responses
+
 from db_users_controller import DB_Users_Controller
 from fastapi import *
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
 from requests_models import *
 from db_users_create import NAME_MAX_LENGTH
@@ -13,9 +15,9 @@ app = FastAPI()  # создание приложения fast_api
 
 #TODO: переделать возвращаемые значения, сделать проверки
 @app.get("/test")  # тестовый запрос наличия запущенного сервера
-async def test() -> bool:
+async def test() -> JSONResponse:
     print("TEST")
-    return True
+    return JSONResponse(content={"success": 1})
 
 
 @app.get("/item")  # получение файла базы данных пользователей
@@ -24,57 +26,50 @@ async def get_item() -> FileResponse:
     return FileResponse("tmp/database.db")
 
 
-@app.post("/auth")  # запрос аутентификации
-async def auth(auth_info: Auth_request) -> str:
+@app.get("/auth")  # запрос аутентификации
+async def auth(auth_info: Auth_request) -> JSONResponse:
     # print(auth_info.name, auth_info.password)
     # получение токена и id пользователя
     id_user, token = db_users_controller.auth_user(auth_info.name, auth_info.password)
     print(f"Returning token {token}")
-    if id_user is None:
-        return ''
-    else:
-        return token
+    return JSONResponse(content={"success": int(token is not None), "data": token})
 
 
 @app.get("/test_token")  # запрос проверки токена
-async def test_token(token_request: Standard_token_request) -> bool:
+async def test_token(token_request: Standard_token_request) -> JSONResponse:
     print(f"Testing token {token_request.token}")
     result = db_users_controller.check_token_exists(token_request.token)  # проверка существования токена
-    if result:
-        print("Correct access token!")
-    else:
-        print("Incorrect access token!")
-    return result
+    return JSONResponse(content={"success": int(result)})
 
 
 @app.get("/get_users")  # запрос получения списка словарей с данными пользователей
-async def get_users(token_request: Standard_token_request):
+async def get_users(token_request: Standard_token_request) -> JSONResponse:
     # проверка токена и прав доступа админа для совершения запроса
     if db_users_controller.check_token_exists(token_request.token) and db_users_controller.check_token_admin(
             token_request.token) and token_request.token != "":
-        return db_users_controller.get_users_list()
+        return JSONResponse(content={"success": 1, "data": db_users_controller.get_users_list()})
     else:
         print(f"Admin request with incorrect token!!! Token: {token_request.token}")
         print(f"Token exists: {db_users_controller.check_token_exists(token_request.token)}")
         print(f"Admin rights: {db_users_controller.check_token_admin(token_request.token)}")
-        return None
+        return JSONResponse(content={"success": 0})
 
 
 @app.get("/add_user")  # запрос добавления нового пользователя
-async def add_user(token_request: Adding_user_token_request) -> str:
+async def add_user(token_request: Adding_user_token_request) -> JSONResponse:
     # проверка токена и прав доступа админа для совершения запроса
     if db_users_controller.check_token_exists(token_request.token) and db_users_controller.check_token_admin(
             token_request.token):
         # вызов функции добавления нового пользователя
         print(len(token_request.name))
         if len(token_request.name) > NAME_MAX_LENGTH:
-            return "Incorrect name length (more than 100 characters)"
+            return JSONResponse(content={"success": 0, "data": "Incorrect name length (more than 100 characters)"})
         db_users_controller.add_user(name=token_request.name,
                                      password=token_request.password, is_admin=token_request.is_admin == "True")
-        return "Correct creation!"
+        return JSONResponse(content={"success": 1, "data": "Correct creation!"})
     else:
         print(f"Admin request with incorrect token!!! Token: {token_request.token}")
-        return f"Admin request with incorrect token!!! Token: {token_request.token}"
+        return JSONResponse(content={"success": 0, "data": f"Admin request with incorrect token!!! Token: {token_request.token}"})
 
 
 @app.get("/log_out")  # запрос отключения токена (выхода из учетной записи)
@@ -84,14 +79,14 @@ async def log_out(token_request: Standard_token_request):
 
 
 @app.get("/delete_user")  # запрос удаления пользователя
-async def delete_user(token_request: Deleting_user_request) -> str:
+async def delete_user(token_request: Deleting_user_request) -> JSONResponse:
     # проверка токена и прав администратора
     if db_users_controller.check_token_exists(token_request.token) and db_users_controller.check_token_admin(
             token_request.token):
         db_users_controller.delete_user(token_request.id)  # вызов функции удаления пользователя
-        return f"Correct deleting user with id = {token_request.id}!"
+        return JSONResponse(content={"success": 1, "data": f"Correct deleting user with id = {token_request.id}!"})
     else:
-        return f"Admin request with incorrect token!!! Token: {token_request.token}"
+        return JSONResponse(content={"success": 0, "data": f"Admin request with incorrect token!!! Token: {token_request.token}"})
 
 
 """@app.middleware("http")  

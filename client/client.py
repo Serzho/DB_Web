@@ -4,7 +4,6 @@ from requests.exceptions import ConnectionError
 from commands_handler import *
 
 # главный исполняемый файл клиента
-#TODO:отформатировать файлы
 
 commandHandler = CommandHandler()
 

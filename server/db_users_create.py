@@ -3,24 +3,14 @@ import os.path
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 
+
 Base = declarative_base()
 NAME_MAX_LENGTH = 100
 #TODO: закинуть это в служебное и убрать такой бред отсюда
 #TODO: переделтаь под модуль PATH
 # проверка существования базы данных
-if not os.path.exists("tmp/database.db"):
-    with open("tmp/database.db", "wb") as f:
-        # создание базы данных
-        print("Database.db is not found!!!\nCreated database.db")
-        db_users_loaded = False
-        f.close()
+# def db_exists():
 
-else:
-    # пробное открытие базы данных
-    with open("tmp/database.db", "ab") as f:
-        print("Opened database.db")
-        db_users_loaded = True
-        f.close()
 
 
 class User(Base):  # модель базы данных пользователей

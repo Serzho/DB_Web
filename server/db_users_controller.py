@@ -149,10 +149,13 @@ class DB_Users_Controller:  # класс контроллера базы дан�
         ).filter(
             Token.access_token == token.strip("\""),
         ).first()
+        if token is None:
+            return False
         admins_list = self.session.query(
             User.id, User.is_admin
         ).filter(
-            User.is_admin.is_(True), User.id == token.id
+            User.is_admin.is_(True),
+            User.id == token.id
         ).all()
         return bool(admins_list)
 

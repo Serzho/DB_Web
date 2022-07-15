@@ -13,7 +13,7 @@ class CommandHandler:
         self.ip = "127.0.0.1"
         self.port = "9999"
         self.token = ''
-        self.commands_dict = {  # TODO: переделать
+        self.commands_dict = {
             "/help": {"f_name": self.print_help, "argv": ()},
             "/test": {"f_name": self.test_request, "argv": ()},
             "/auth": {"f_name": self.auth, "argv": ("name", "password")},
@@ -55,37 +55,37 @@ class CommandHandler:
                "\n/delay - get request delay to server "
         print(text)
 
-    # TODO: Изменить адрес и порт на переменные
-    # TODO: переписать возвращаемые значения
-    # TODO: указать типы
-
     def get_delay(self):
         starting_time = datetime.datetime.now()
         self.test_request()
         delta = datetime.datetime.now() - starting_time
         print(f"Delay: {delta.microseconds // 1000} ms")
 
-    def test_request(self):  # проверка доступа к серверу
+    def test_request(self) -> bool:  # проверка доступа к серверу
         print("Trying to connect...")
         response = requests.get(f'http://{self.ip}:{self.port}/test')
-        if bool(response.text):  # TODO: проверить это
+        print(json.loads(response.content).get("success"))
+        success = bool(json.loads(response.content).get("success"))
+        if success:
             print("Successful request to server!!!")
         else:
             print("Invalid request to server...")
-        return response.text
+        return success
 
-    def auth(self, name, password):  # запрос аутентификации
+    def auth(self, name: str, password: str):  # запрос аутентификации
         print(f"Auth user {name} with password {password}")
         if password is not "password":
-            response = requests.post(
+            response = requests.get(
                 f'http://{self.ip}:{self.port}/auth/',
                 json={"name": name, "password": password}
             )
-            if response.text.strip("\"") == '':
-                print("Incorrect name or password!")
+            success = bool(json.loads(response.content).get("success"))
+            if success:
+                token = json.loads(response.content).get("data")
+                print(f"Correct authentication! Token {token}")
+                self.token = token
             else:
-                print(f"Correct authentication! Token {response.text}")
-            self.token = response.text
+                print("Incorrect name or password!")
         else:
             print("Incorrect parameters!!!")
 
@@ -94,7 +94,8 @@ class CommandHandler:
             f'http://{self.ip}:{self.port}/test_token',
             json={"token": self.token}
         )
-        if bool(response):  # TODO: проверить это
+        success = json.loads(response.content).get("success")
+        if success:
             print("Correct access token!")
         else:
             print("Incorrect access token!")
@@ -105,20 +106,27 @@ class CommandHandler:
             f'http://{self.ip}:{self.port}/get_users',
             json={"token": self.token}
         )
-        if response.text != "null":
-            users_list = json.loads(response.text)
+        success = json.loads(response.content).get("success")
+        if success:
+            users_list = json.loads(response.content).get("data")
             for user in users_list:
                 print(user)
         else:
             print("Incorrect access token!")
 
-    def add_user(self, name, password, is_admin):  # запрос на добавление нового пользователя
+    def add_user(self, name: str, password: str, is_admin: str):  # запрос на добавление нового пользователя
         print(self.token, name, password, is_admin)
         response = requests.get(
             f'http://{self.ip}:{self.port}/add_user',
             json={"token": self.token, "name": name, "password": password, "is_admin": is_admin}
         )
-        print(response.text)
+        success = json.loads(response.content).get("success")
+        if success:
+            print("User was added:")
+            print((json.loads(response.content).get("data")))
+        else:
+            print("Error: ")
+            print((json.loads(response.content).get("data")))
 
     def log_out(self):  # запрос на отключение токена доступа
         requests.get(
@@ -127,10 +135,10 @@ class CommandHandler:
         )
         print("Logged out...")
 
-    def delete_user(self, id_user):  # запрос на удаление пользователя
+    def delete_user(self, id_user: str):  # запрос на удаление пользователя
         print(f"Deleting request: token {self.token}, id_user {id_user}")
         response = requests.get(
             f'http://{self.ip}:{self.port}/delete_user',
             json={"token": self.token, "id": id_user}
         )
-        print(response.text)
+        print((json.loads(response.content).get("data")))
