@@ -1,16 +1,8 @@
-import os.path
-
 import sqlalchemy
 from sqlalchemy.ext.declarative import declarative_base
 
-
 Base = declarative_base()
 NAME_MAX_LENGTH = 100
-#TODO: закинуть это в служебное и убрать такой бред отсюда
-#TODO: переделтаь под модуль PATH
-# проверка существования базы данных
-# def db_exists():
-
 
 
 class User(Base):  # модель базы данных пользователей
@@ -19,18 +11,11 @@ class User(Base):  # модель базы данных пользователе
     is_admin = sqlalchemy.Column("is_admin", sqlalchemy.Boolean)  # наличие прав администратора
     name = sqlalchemy.Column("name", sqlalchemy.String(NAME_MAX_LENGTH))  # имя пользователя#TODO: проверить ограничение
     hashed_password = sqlalchemy.Column("hashed_password", sqlalchemy.String(32))  # пароль в хешируемом виде #TODO: вынести константы
-    is_active = sqlalchemy.Column(  # есть ли созданный токен (активно ли подключение пользователя) #TODO: бесполезно, убрать
-        "is_active",
-        sqlalchemy.Boolean(),
-    )
 
-
-
-    def __init__(self, is_admin: bool, name: str, hashed_password: str, is_active: bool): #TODO: проверить нужно ли это
+    def __init__(self, is_admin: bool, name: str, hashed_password: str): #TODO: проверить нужно ли это
         self.is_admin = is_admin
         self.name = name
         self.hashed_password = hashed_password
-        self.is_active = is_active
 
     def get_dict(self) -> dict:
         returning_dict = {
@@ -38,7 +23,6 @@ class User(Base):  # модель базы данных пользователе
             "is_admin": self.is_admin,
             "name": self.name,
             "hashed_password": self.hashed_password,
-            "is_active": self.is_active,
         }
         return returning_dict
 

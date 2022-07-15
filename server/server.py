@@ -1,6 +1,4 @@
-import fastapi.responses
-
-from db_users_controller import DB_Users_Controller
+from db_users_controller import DbUsersController
 from fastapi import *
 from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
@@ -10,10 +8,10 @@ from db_users_create import NAME_MAX_LENGTH
 # главный исполняемый файл сервера
 
 print("Starting_server...")
-db_users_controller = DB_Users_Controller()  # инициализация контроллера базы данных пользователей
+db_users_controller = DbUsersController()  # инициализация контроллера базы данных пользователей
 app = FastAPI()  # создание приложения fast_api
 
-#TODO: переделать возвращаемые значения, сделать проверки
+
 @app.get("/test")  # тестовый запрос наличия запущенного сервера
 async def test() -> JSONResponse:
     print("TEST")
@@ -69,7 +67,8 @@ async def add_user(token_request: Adding_user_token_request) -> JSONResponse:
         return JSONResponse(content={"success": 1, "data": "Correct creation!"})
     else:
         print(f"Admin request with incorrect token!!! Token: {token_request.token}")
-        return JSONResponse(content={"success": 0, "data": f"Admin request with incorrect token!!! Token: {token_request.token}"})
+        return JSONResponse(
+            content={"success": 0, "data": f"Admin request with incorrect token!!! Token: {token_request.token}"})
 
 
 @app.get("/log_out")  # запрос отключения токена (выхода из учетной записи)
@@ -86,7 +85,8 @@ async def delete_user(token_request: Deleting_user_request) -> JSONResponse:
         db_users_controller.delete_user(token_request.id)  # вызов функции удаления пользователя
         return JSONResponse(content={"success": 1, "data": f"Correct deleting user with id = {token_request.id}!"})
     else:
-        return JSONResponse(content={"success": 0, "data": f"Admin request with incorrect token!!! Token: {token_request.token}"})
+        return JSONResponse(
+            content={"success": 0, "data": f"Admin request with incorrect token!!! Token: {token_request.token}"})
 
 
 """@app.middleware("http")  

@@ -27,12 +27,15 @@ class CommandHandler:
 
     def input_command(self) -> {str: list}:
         input_string = input().split()
-        user_input = {"command": input_string.pop(0)}
-        if len(input_string):
-            user_input.update({"argv": input_string})
+        if input_string:
+            user_input = {"command": input_string.pop(0)}
+            if len(input_string):
+                user_input.update({"argv": input_string})
+            else:
+                user_input.update({"argv": []})
+            print(user_input.get("command"), user_input.get("argv"))
         else:
-            user_input.update({"argv": []})
-        print(user_input.get("command"), user_input.get("argv"))
+            user_input = {"command": "empty"}
         return user_input
 
     def run_command(self, user_input: {str: list}):

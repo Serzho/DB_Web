@@ -26,5 +26,7 @@ if server_connected:  # проверка работы сервера
             commandHandler.log_out()
             print("Exiting the program...")
             break
+        elif command_input.get("command") == "empty":
+            print("Empty input!")
         else:
             print('Invalid command!!! Please write "/help" for a list of available commands')
