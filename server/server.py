@@ -1,25 +1,21 @@
-import datetime
-
 from db_users_controller import DBUsersController
 from fastapi import *
 from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
 from requests_models import *
-from db_users_create import NAME_MAX_LENGTH
-import logging
-from datetime import datetime
+from user_table import NAME_MAX_LENGTH
+from service import base_logger, create_logger, create_json_response
+
 # главный исполняемый файл сервера
 
-FILE_NAME = "SERVER"
+create_logger("server.log")
 
 
-def log(msg):
-    time = datetime.now().time()
-    logging.info(f" {time.hour}:{time.minute}:{time.second} {FILE_NAME}: {msg}")
+def log(message):
+    module_name = "SERVER"
+    base_logger(msg=message, module_name=module_name)
 
 
-logging.basicConfig(filename="server.log", level=logging.INFO)
-logging.info("\n" * 3 + "/" * 10)
 log("Starting_server...")
 print("Starting_server...")
 db_users_controller = DBUsersController()  # инициализация контроллера базы данных пользователей
@@ -31,7 +27,7 @@ log("App created!")
 async def test() -> JSONResponse:
     # print("TEST")
     log("Test request")
-    return JSONResponse(content={"success": 1})
+    return create_json_response({"success": 1})
 
 
 @app.get("/item")  # получение файла базы данных пользователей
@@ -49,7 +45,7 @@ async def auth(auth_info: Auth_request) -> JSONResponse:
     id_user, token = db_users_controller.auth_user(auth_info.name, auth_info.password)
     log(f"Result: success = {token is not None}, token = {token}")
     print(f"Returning token {token}")
-    return JSONResponse(content={"success": token is not None, "data": token})
+    return create_json_response({"success": token is not None, "data": token})
 
 
 @app.get("/test_token")  # запрос проверки токена
@@ -58,7 +54,7 @@ async def test_token(token_request: Standard_token_request) -> JSONResponse:
     log(f"Testing token request: token = {token_request.token}")
     result = db_users_controller.token_exists(token_request.token)  # проверка существования токена
     log(f"Result: success = {result}")
-    return JSONResponse(content={"success": result})
+    return create_json_response({"success": result})
 
 
 @app.get("/get_users")  # запрос получения списка словарей с данными пользователей
@@ -68,7 +64,7 @@ async def get_users(token_request: Standard_token_request) -> JSONResponse:
     if db_users_controller.token_exists(token_request.token) and db_users_controller.token_is_admin(
             token_request.token) and token_request.token != "":
         log(f"Result: success = {True}, len of users list = {len(db_users_controller.users_list())}")
-        return JSONResponse(content={"success": True, "data": db_users_controller.users_list()})
+        return create_json_response({"success": True, "data": db_users_controller.users_list()})
     else:
         print(f"Admin request with incorrect token!!! Token: {token_request.token}")
         print(f"Token exists: {db_users_controller.token_exists(token_request.token)}")
@@ -76,7 +72,7 @@ async def get_users(token_request: Standard_token_request) -> JSONResponse:
         log(f"Result: success = {False}, "
             f"token exists = {db_users_controller.token_exists(token_request.token)}, "
             f"having admin rights = {db_users_controller.token_is_admin(token_request.token)}")
-        return JSONResponse(content={"success": False})
+        return create_json_response({"success": False})
 
 
 @app.get("/add_user")  # запрос добавления нового пользователя
@@ -92,16 +88,16 @@ async def add_user(token_request: Adding_user_token_request) -> JSONResponse:
         print(len(token_request.name))
         if len(token_request.name) > NAME_MAX_LENGTH:
             log(f"Result: success = {False}, Incorrect name length!")
-            return JSONResponse(content={"success": False, "data": "Incorrect name length (more than 100 characters)"})
+            return create_json_response({"success": False, "data": "Incorrect name length (more than 100 characters)"})
         db_users_controller.add_user(name=token_request.name,
                                      password=token_request.password, is_admin=token_request.is_admin == "True")
         log(f"Result: success = {True}, Correct creation!")
-        return JSONResponse(content={"success": True, "data": "Correct creation!"})
+        return create_json_response({"success": True, "data": "Correct creation!"})
     else:
         print(f"Admin request with incorrect token!!! Token: {token_request.token}")
         log(f"Result: success = {False}, Incorrect token to admin request")
-        return JSONResponse(
-            content={"success": False, "data": f"Admin request with incorrect token!!! Token: {token_request.token}"}
+        return create_json_response(
+            {"success": False, "data": f"Admin request with incorrect token!!! Token: {token_request.token}"}
         )
 
 
@@ -120,11 +116,12 @@ async def delete_user(token_request: Deleting_user_request) -> JSONResponse:
             token_request.token):
         db_users_controller.delete_user(token_request.id)  # вызов функции удаления пользователя
         log(f"Result: success = {True}, Correct deleting user")
-        return JSONResponse(content={"success": True, "data": f"Correct deleting user with id = {token_request.id}!"})
+        return create_json_response({"success": True, "data": f"Correct deleting user with id = {token_request.id}!"})
     else:
         log(f"Result: success = {False}, Incorrect token to admin request")
-        return JSONResponse(
-            content={"success": False, "data": f"Admin request with incorrect token!!! Token: {token_request.token}"})
+        return create_json_response(
+            {"success": False, "data": f"Admin request with incorrect token!!! Token: {token_request.token}"}
+        )
 
 
 """@app.middleware("http")  
@@ -136,4 +133,3 @@ async def debug_request(request: Request, call_next):
 uvicorn.run(app=app, host="localhost", port=9999)  # запуск сервера
 log(f"Stopping server...")
 db_users_controller.stop_tokens_controller()  # остановка потока с контроллером токенов после остановки сервера
-
