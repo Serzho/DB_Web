@@ -33,5 +33,3 @@ class TestCommandsHandler(unittest.TestCase):
         self.assertRaises(Exception, commands_handler.input_command("/delete_user 1 1"))
         self.assertRaises(Exception, commands_handler.input_command("/delete_user 10"))
         self.assertRaises(Exception, commands_handler.input_command("/add_user aaaaa sss b"))
-
-
