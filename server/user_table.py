@@ -1,10 +1,10 @@
 import sqlalchemy
-from service import Base
+from service import Base_auth
 
 NAME_MAX_LENGTH = 100
 
 
-class User(Base):  # модель базы данных пользователей
+class User(Base_auth):  # модель базы данных пользователей
     __tablename__ = 'user'
     id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True)  # id (номер) пользователя
     is_admin = sqlalchemy.Column("is_admin", sqlalchemy.Boolean)  # наличие прав администратора

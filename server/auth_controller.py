@@ -21,7 +21,7 @@ class AuthController:  # класс контроллера базы данных
 
     def __init__(self):
         print("Creating users table...")
-        self.session, db_exists = load_session("tmp/auth.db")  # создание сессии базы данных
+        self.session, db_exists = load_session("auth")  # создание сессии базы данных
         print("Successful creating!")
         if not db_exists:  # создание учетной записи администратора при создании новой бд
             self.create_main_admin()
@@ -129,6 +129,7 @@ class AuthController:  # класс контроллера базы данных
     def stop_tokens_controller(self) -> None:  # функция остановки контроллера токенов
         self.tokens_controller.is_running = False
         self.tokens_controller.join()
+        self.__delete_all_tokens()
         print("Stopped tokens controller!!!")
         log("Tokens controller was stopped!!!")
 
@@ -200,7 +201,7 @@ class AuthController:  # класс контроллера базы данных
         else:
             log(f"Result: id of token = {token} wasn't find!!!")
 
-    def delete_user(self, id_user) -> None:  # функция удаления пользователя
+    def delete_user(self, id_user) -> bool:  # функция удаления пользователя
         log(f"Deleting user with id = {id_user}")
         self.delete_token(id_user)  # удаление токена доступа пользователя
         query_names = self.session.query(User).filter(User.id == id_user)
@@ -209,4 +210,5 @@ class AuthController:  # класс контроллера базы данных
                 log(f"User with id = {id_user} was deleted!")
                 self.session.delete(user)
                 self.session.commit()
-                break
+                return True
+        return False

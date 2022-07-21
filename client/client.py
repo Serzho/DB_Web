@@ -3,6 +3,7 @@ from requests.exceptions import ConnectionError
 
 from commands_handler import *
 # TODO: сделать автоматическую ре-аунтетификацию
+# TODO: добавить новые команды
 # главный исполняемый файл клиента
 
 commandHandler = CommandsHandler()

@@ -1,10 +1,10 @@
 import datetime
 
 import sqlalchemy
-from service import Base
+from service import Base_auth
 
 
-class Token(Base):
+class Token(Base_auth):
     __tablename__ = 'token'
     id = sqlalchemy.Column("id", sqlalchemy.Integer, sqlalchemy.ForeignKey('user.id'), primary_key=True)
     access_token = sqlalchemy.Column("access_token", sqlalchemy.String(32))  # токен доступа

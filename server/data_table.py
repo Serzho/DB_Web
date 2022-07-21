@@ -1,10 +1,10 @@
 import datetime
 
 import sqlalchemy
-from service import Base
+from service import Base_db
 
 
-class Token(Base):
+class Data(Base_db):
     __tablename__ = 'data'
     id = sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True)
     author_id = sqlalchemy.Column("author_id", sqlalchemy.Integer)

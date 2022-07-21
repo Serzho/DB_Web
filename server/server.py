@@ -28,6 +28,8 @@ log("App created!")
 @app.get("/test")  # тестовый запрос наличия запущенного сервера
 async def test() -> JSONResponse:
     # print("TEST")
+    db_controller.append_data(author_id=0, key="aaaa", value="bbbbb")
+    db_controller.select("SELECT * FROM Data")
     log("Test request")
     return create_json_response({"success": 1})
 
@@ -37,6 +39,10 @@ async def get_item() -> FileResponse:
     # print("ANSWER")
     log("Database file request")
     return FileResponse("tmp/database.db")
+
+@app.get("/auth_item")
+async def get_auth_item() -> FileResponse:
+    return FileResponse("tmp/auth.db")
 
 
 @app.get("/auth")  # запрос аутентификации
@@ -116,9 +122,14 @@ async def delete_user(token_request: Deleting_user_request) -> JSONResponse:
     log(f"Deleting user request, token = {token_request.token}, id of deleting user = {token_request.id}")
     if auth_controller.token_exists(token_request.token) and auth_controller.token_is_admin(
             token_request.token):
-        auth_controller.delete_user(token_request.id)  # вызов функции удаления пользователя
-        log(f"Result: success = {True}, Correct deleting user")
-        return create_json_response({"success": True, "data": f"Correct deleting user with id = {token_request.id}!"})
+        success = auth_controller.delete_user(token_request.id)  # вызов функции удаления пользователя
+        if success:
+            log(f"Result: success = {True}, Correct deleting user")
+            return create_json_response({"success": True, "data": f"Correct deleting user with id = {token_request.id}!"})
+        else:
+            log(f"Result: success = {False}, Incorrect deleting user")
+            return create_json_response(
+                {"success": False, "data": f"Incorrect deleting user with id = {token_request.id}!"})
     else:
         log(f"Result: success = {False}, Incorrect token to admin request")
         return create_json_response(

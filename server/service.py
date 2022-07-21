@@ -6,14 +6,24 @@ from datetime import datetime
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+Base_auth = declarative_base()
+Base_db = declarative_base()
 
 
-def load_session(path: str) -> (Session, bool):
-    db_exists = Path.exists(Path(path))
-    engine = create_engine(
-        f"sqlite:///{path}?check_same_thread=False")  # создание движка базы данных
-    Base.metadata.create_all(engine)  # создание базы данных
+def load_session(session_type: str) -> (Session, bool):
+    db_exists = False
+    engine = None
+    if session_type == "auth":
+        db_exists = Path.exists(Path("tmp/auth.db"))
+        engine = create_engine(
+            f"sqlite:///tmp/auth.db?check_same_thread=False")  # создание движка базы данных
+        Base_auth.metadata.create_all(bind=engine)  # создание базы данных
+    elif session_type == "data":
+        db_exists = Path.exists(Path("tmp/database.db"))
+        engine = create_engine(
+            f"sqlite:///tmp/database.db?check_same_thread=False")  # создание движка базы данных
+        Base_db.metadata.create_all(bind=engine)  # создание базы данных
+
     return Session(bind=engine), db_exists
 
 
