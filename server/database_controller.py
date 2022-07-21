@@ -11,6 +11,7 @@ class DatabaseController:
         self.session, __db_exists = load_session("data")
 
     def append_data(self, author_id: int, key: str, value: str) -> None:
+        print(author_id, key, value)
         current_date = datetime.now()
         data_row = Data(author_id=author_id, key=key, value=value, time_creation=current_date)
         self.session.add(data_row)
@@ -27,5 +28,8 @@ class DatabaseController:
 
     def select(self, sql_request: str):
         sql_response = self.session.execute(sql_request)
-        for line in sql_response:
-            print(line)
+        returning_list = []
+        for row in sql_response:
+            returning_list.append(list(row))
+        return returning_list
+

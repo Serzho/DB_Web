@@ -24,9 +24,9 @@ class CommandsHandler:
             "/delete_user": {"f_name": self.delete_user, "argv": ("0",)},
             "/log_out": {"f_name": self.log_out, "argv": ()},
             "/delay": {"f_name": self.get_delay, "argv": ()},
-            "/select_data": {"f_name": self.select_data, "argv": ("sql_request")},
+            "/select_data": {"f_name": self.select_data, "argv": ("sql_request",)},
             "/add_data": {"f_name": self.add_data, "argv": ("key", "value")},
-            "/remove_data": {"f_name": self.remove_data, "argv": ("id_data")},
+            "/remove_data": {"f_name": self.remove_data, "argv": ("id_data",)},
         }  # словарь доступных команд
 
     def select_data(self, sql_request: str) -> None:
@@ -59,7 +59,10 @@ class CommandsHandler:
         if input_string:
             user_input = {"command": input_string.pop(0)}
             if len(input_string):
-                user_input.update({"argv": input_string})
+                if user_input.get("command") == "/select_data":
+                    user_input.update({"argv": [" ".join(input_string)]})
+                else:
+                    user_input.update({"argv": input_string})
             else:
                 user_input.update({"argv": []})
             print(user_input.get("command"), user_input.get("argv"))
@@ -71,6 +74,7 @@ class CommandsHandler:
 
     def run_command(self, user_input: {str: list}):
         if len(user_input.get("argv")) != len(self.commands_dict.get(user_input.get("command")).get("argv")):
+            print(len(user_input.get("argv")))
             print("Invalid parameter")
         else:
             self.commands_dict.get(
@@ -89,7 +93,8 @@ class CommandsHandler:
                "\n/delay - get request delay to server " \
                "\n/select_data [sql request] - selecting data from database" \
                "\n/remove_data [id_data] - removing data from database" \
-               "\n/add_data [key] [value] - adding data to database"
+               "\n/add_data [key] [value] - adding data to database" \
+               "\n"
         print(text)
 
     def get_delay(self):

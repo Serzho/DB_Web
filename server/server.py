@@ -34,6 +34,7 @@ async def test() -> JSONResponse:
 
 @app.get("/add_data")
 async def add_data(add_info: Adding_data_request) -> JSONResponse:
+    print(add_info.key, add_info.value, add_info.token)
     if auth_controller.token_exists(add_info.token):
         db_controller.append_data(
             author_id=auth_controller.get_token_id(add_info.token),
