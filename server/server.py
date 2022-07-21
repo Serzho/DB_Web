@@ -1,10 +1,11 @@
-from db_users_controller import DBUsersController
+from auth_controller import AuthController
 from fastapi import *
 from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
 from requests_models import *
 from user_table import NAME_MAX_LENGTH
 from service import base_logger, create_logger, create_json_response
+from database_controller import DatabaseController
 
 # главный исполняемый файл сервера
 
@@ -18,7 +19,8 @@ def log(message):
 
 log("Starting_server...")
 print("Starting_server...")
-db_users_controller = DBUsersController()  # инициализация контроллера базы данных пользователей
+auth_controller = AuthController()  # инициализация контроллера базы данных пользователей
+db_controller = DatabaseController()
 app = FastAPI()  # создание приложения fast_api
 log("App created!")
 
@@ -42,7 +44,7 @@ async def auth(auth_info: Auth_request) -> JSONResponse:
     # print(auth_info.name, auth_info.password)
     # получение токена и id пользователя
     log(f"Auth request with name: {auth_info.name}, password: {auth_info.password}")
-    id_user, token = db_users_controller.auth_user(auth_info.name, auth_info.password)
+    id_user, token = auth_controller.auth_user(auth_info.name, auth_info.password)
     log(f"Result: success = {token is not None}, token = {token}")
     print(f"Returning token {token}")
     return create_json_response({"success": token is not None, "data": token})
@@ -52,7 +54,7 @@ async def auth(auth_info: Auth_request) -> JSONResponse:
 async def test_token(token_request: Standard_token_request) -> JSONResponse:
     print(f"Testing token {token_request.token}")
     log(f"Testing token request: token = {token_request.token}")
-    result = db_users_controller.token_exists(token_request.token)  # проверка существования токена
+    result = auth_controller.token_exists(token_request.token)  # проверка существования токена
     log(f"Result: success = {result}")
     return create_json_response({"success": result})
 
@@ -61,17 +63,17 @@ async def test_token(token_request: Standard_token_request) -> JSONResponse:
 async def get_users(token_request: Standard_token_request) -> JSONResponse:
     # проверка токена и прав доступа админа для совершения запроса
     log(f"Getting users request: token = {token_request.token}")
-    if db_users_controller.token_exists(token_request.token) and db_users_controller.token_is_admin(
-            token_request.token) and token_request.token != "":
-        log(f"Result: success = {True}, len of users list = {len(db_users_controller.users_list())}")
-        return create_json_response({"success": True, "data": db_users_controller.users_list()})
+    if auth_controller.token_exists(token_request.token) and auth_controller.token_is_admin(
+            token_request.token) and token_request.token != "": # TODO: переделать
+        log(f"Result: success = {True}, len of users list = {len(auth_controller.users_list())}")
+        return create_json_response({"success": True, "data": auth_controller.users_list()})
     else:
         print(f"Admin request with incorrect token!!! Token: {token_request.token}")
-        print(f"Token exists: {db_users_controller.token_exists(token_request.token)}")
-        print(f"Admin rights: {db_users_controller.token_is_admin(token_request.token)}")
+        print(f"Token exists: {auth_controller.token_exists(token_request.token)}")
+        print(f"Admin rights: {auth_controller.token_is_admin(token_request.token)}")
         log(f"Result: success = {False}, "
-            f"token exists = {db_users_controller.token_exists(token_request.token)}, "
-            f"having admin rights = {db_users_controller.token_is_admin(token_request.token)}")
+            f"token exists = {auth_controller.token_exists(token_request.token)}, "
+            f"having admin rights = {auth_controller.token_is_admin(token_request.token)}")
         return create_json_response({"success": False})
 
 
@@ -82,15 +84,15 @@ async def add_user(token_request: Adding_user_token_request) -> JSONResponse:
         f"name = {token_request.name}, "
         f"password = {token_request.password}, "
         f"is_admin = {token_request.is_admin}")
-    if db_users_controller.token_exists(token_request.token) and db_users_controller.token_is_admin(
+    if auth_controller.token_exists(token_request.token) and auth_controller.token_is_admin(
             token_request.token):
         # вызов функции добавления нового пользователя
         print(len(token_request.name))
         if len(token_request.name) > NAME_MAX_LENGTH:
             log(f"Result: success = {False}, Incorrect name length!")
             return create_json_response({"success": False, "data": "Incorrect name length (more than 100 characters)"})
-        db_users_controller.add_user(name=token_request.name,
-                                     password=token_request.password, is_admin=token_request.is_admin == "True")
+        auth_controller.add_user(name=token_request.name,
+                                 password=token_request.password, is_admin=token_request.is_admin == "True")
         log(f"Result: success = {True}, Correct creation!")
         return create_json_response({"success": True, "data": "Correct creation!"})
     else:
@@ -105,16 +107,16 @@ async def add_user(token_request: Adding_user_token_request) -> JSONResponse:
 async def log_out(token_request: Standard_token_request):
     # получение id токена и удаление его
     log(f"Logged out request, token = {token_request.token}")
-    db_users_controller.delete_token(db_users_controller.get_token_id(token_request.token))
+    auth_controller.delete_token(auth_controller.get_token_id(token_request.token))
 
 
 @app.get("/delete_user")  # запрос удаления пользователя
 async def delete_user(token_request: Deleting_user_request) -> JSONResponse:
     # проверка токена и прав администратора
     log(f"Deleting user request, token = {token_request.token}, id of deleting user = {token_request.id}")
-    if db_users_controller.token_exists(token_request.token) and db_users_controller.token_is_admin(
+    if auth_controller.token_exists(token_request.token) and auth_controller.token_is_admin(
             token_request.token):
-        db_users_controller.delete_user(token_request.id)  # вызов функции удаления пользователя
+        auth_controller.delete_user(token_request.id)  # вызов функции удаления пользователя
         log(f"Result: success = {True}, Correct deleting user")
         return create_json_response({"success": True, "data": f"Correct deleting user with id = {token_request.id}!"})
     else:
@@ -132,4 +134,4 @@ async def debug_request(request: Request, call_next):
 
 uvicorn.run(app=app, host="localhost", port=9999)  # запуск сервера
 log(f"Stopping server...")
-db_users_controller.stop_tokens_controller()  # остановка потока с контроллером токенов после остановки сервера
+auth_controller.stop_tokens_controller()  # остановка потока с контроллером токенов после остановки сервера

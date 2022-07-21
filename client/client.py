@@ -2,7 +2,7 @@
 from requests.exceptions import ConnectionError
 
 from commands_handler import *
-
+# TODO: сделать автоматическую ре-аунтетификацию
 # главный исполняемый файл клиента
 
 commandHandler = CommandsHandler()

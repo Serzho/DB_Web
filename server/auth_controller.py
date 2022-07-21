@@ -11,27 +11,24 @@ from service import load_session, base_logger
 
 
 def log(message):
-    module_name = "DATABASE CONTROLLER"
+    module_name = "AUTH CONTROLLER"
     base_logger(msg=message, module_name=module_name)
 
 
-class DBUsersController:  # класс контроллера базы данных пользователя
+class AuthController:  # класс контроллера базы данных пользователя
     session = None
     tokens_controller = None
 
-    # TODO: исправить названия
-    # TODO: исправить ошибки в английских словах
-
     def __init__(self):
         print("Creating users table...")
-        self.session, db_exists = load_session()  # создание сессии базы данных
+        self.session, db_exists = load_session("tmp/auth.db")  # создание сессии базы данных
         print("Successful creating!")
         if not db_exists:  # создание учетной записи администратора при создании новой бд
             self.create_main_admin()
         self.tokens_controller = TokensController(self)  # создание контроллера токеов
         self.tokens_controller.start()  # запуск контроллера токенов
-        self.delete_all_tokens()  # очистка всех токенов при открытии базы данных
-        log("Database controller initialized")
+        self.__delete_all_tokens()  # очистка всех токенов при открытии базы данных
+        log("Auth controller initialized")
 
     def create_main_admin(self) -> None:  # создание первого администратора
         log("Creating first admin profile")
@@ -76,7 +73,7 @@ class DBUsersController:  # класс контроллера базы данн�
             print("Correct!")
             print("Creating access token...")
             log(f"Creating access token: id = {user.id}")
-            token = self.create_token(id_auth_user)  # создание токена доступа
+            token = self.__create_token(id_auth_user)  # создание токена доступа
             print("Token successfully created!")
             log(f"Correct authentication: id = {user.id}, access token = {token}")
         else:
@@ -91,7 +88,7 @@ class DBUsersController:  # класс контроллера базы данн�
             tokens_list.append({"id": row.id, "time_creation": row.time_creation})
         return tokens_list
 
-    def create_token(self, id_auth: int) -> str:  # функция создания токена
+    def __create_token(self, id_auth: int) -> str:  # функция создания токена
         log(f"Creating token with id = {id_auth}")
         token = secrets.token_hex(16)  # получение случайного значения
         print(f"Id of token {id_auth}")
@@ -181,7 +178,7 @@ class DBUsersController:  # класс контроллера базы данн�
         log(f"Result: token = {token} have admin rights = {admins_list > 0}")
         return admins_list > 0
 
-    def delete_all_tokens(self) -> None:  # функция удаления всех токенов доступа
+    def __delete_all_tokens(self) -> None:  # функция удаления всех токенов доступа
         log(f"Deleting all tokens")
         for user in self.session.query(User).all():
             print(f"Id of token to delete: {user.id} by clear_access_tokens")

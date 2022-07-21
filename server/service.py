@@ -9,10 +9,10 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-def load_session() -> (Session, bool):
-    db_exists = Path.exists(Path("tmp/database.db"))
+def load_session(path: str) -> (Session, bool):
+    db_exists = Path.exists(Path(path))
     engine = create_engine(
-        "sqlite:///tmp/database.db?check_same_thread=False")  # создание движка базы данных
+        f"sqlite:///{path}?check_same_thread=False")  # создание движка базы данных
     Base.metadata.create_all(engine)  # создание базы данных
     return Session(bind=engine), db_exists
 

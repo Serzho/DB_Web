@@ -40,5 +40,5 @@ class TokensController(Thread):  # контроллер созданных то�
                     log(f"Token deleted! Token id = {token_dict.get('id')}, delta time = {delta}")
                     print(f"Token deleted! Id: {token_dict.get('id')}, Delta: {delta}")
 
-        self.db_users_controller.delete_all_tokens()  # очистка всех токенов при выходе
+        self.db_users_controller.__delete_all_tokens()  # очистка всех токенов при выходе
         log("Token controller disabled!")
