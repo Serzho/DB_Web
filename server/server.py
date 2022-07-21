@@ -28,10 +28,39 @@ log("App created!")
 @app.get("/test")  # тестовый запрос наличия запущенного сервера
 async def test() -> JSONResponse:
     # print("TEST")
-    db_controller.append_data(author_id=0, key="aaaa", value="bbbbb")
-    db_controller.select("SELECT * FROM Data")
     log("Test request")
     return create_json_response({"success": 1})
+
+
+@app.get("/add_data")
+async def add_data(add_info: Adding_data_request) -> JSONResponse:
+    if auth_controller.token_exists(add_info.token):
+        db_controller.append_data(
+            author_id=auth_controller.get_token_id(add_info.token),
+            key=add_info.key,
+            value=add_info.value,
+        )
+        return create_json_response({"success": True})
+    else:
+        return create_json_response({"success": False})
+
+
+@app.get("/remove_data")
+async def remove_data(remove_info: Removing_data_request):
+    if auth_controller.token_exists(remove_info.token):
+        db_controller.remove_data(id_row=remove_info.id_data)
+        return create_json_response({"success": True})
+    else:
+        return create_json_response({"success": False})
+
+
+@app.get("/select_data")
+async def select_data(select_info: Select_data_request):
+    if auth_controller.token_exists(select_info.token):
+        selected_data = db_controller.select(sql_request=select_info.select)
+        return create_json_response({"success": True, "data": selected_data})
+    else:
+        return create_json_response({"success": False})
 
 
 @app.get("/item")  # получение файла базы данных пользователей

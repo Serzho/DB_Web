@@ -10,6 +10,7 @@ class CommandsHandler:
     port = None
 
     def __init__(self):
+        # TODO: сделать ввод ip и port
         self.ip = "127.0.0.1"
         self.port = "9999"
         self.token = ''
@@ -22,8 +23,32 @@ class CommandsHandler:
             "/add_user": {"f_name": self.add_user, "argv": ("name", "password", "False")},
             "/delete_user": {"f_name": self.delete_user, "argv": ("0",)},
             "/log_out": {"f_name": self.log_out, "argv": ()},
-            "/delay": {"f_name": self.get_delay, "argv": ()}
+            "/delay": {"f_name": self.get_delay, "argv": ()},
+            "/select_data": {"f_name": self.select_data, "argv": ("sql_request")},
+            "/add_data": {"f_name": self.add_data, "argv": ("key", "value")},
+            "/remove_data": {"f_name": self.remove_data, "argv": ("id_data")},
         }  # словарь доступных команд
+
+    def select_data(self, sql_request: str) -> None:
+        response = requests.get(f'http://{self.ip}:{self.port}/select_data', json={"select": sql_request, "token": self.token})
+        print(json.loads(response.content).get("success"))
+        success = json.loads(response.content).get("success")
+        if success:
+            data = json.loads(response.content).get("data")
+            for line in data:
+                print(line)
+        else:
+            pass
+
+    def add_data(self, key: str, value: str) -> None:
+        response = requests.get(f'http://{self.ip}:{self.port}/add_data', json={"key": key, "value": value, "token": self.token})
+        success = json.loads(response.content).get("success")
+        print(success)
+
+    def remove_data(self, id_data: str) -> None:
+        response = requests.get(f'http://{self.ip}:{self.port}/remove_data', json={"id_data": int(id_data), "token": self.token})
+        success = json.loads(response.content).get("success")
+        print(success)
 
     def input_command(self, unit_test_input = None) -> {str: list}:
         if unit_test_input is None:
@@ -61,7 +86,10 @@ class CommandsHandler:
                "\n/delete_user [id] - deleting user from database with users" \
                "\n/log_out - log out from the current user" \
                "\n/exit - exit the program" \
-               "\n/delay - get request delay to server "
+               "\n/delay - get request delay to server " \
+               "\n/select_data [sql request] - selecting data from database" \
+               "\n/remove_data [id_data] - removing data from database" \
+               "\n/add_data [key] [value] - adding data to database"
         print(text)
 
     def get_delay(self):

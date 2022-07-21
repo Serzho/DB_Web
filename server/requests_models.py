@@ -25,3 +25,20 @@ class Adding_user_token_request(BaseModel):  # модель запроса на 
 class Deleting_user_request(BaseModel):  # модель запроса на удаление пользователя
     id: int
     token: str
+
+
+class Adding_data_request(BaseModel):
+    key: str
+    value: str
+    token: str
+
+
+class Removing_data_request(BaseModel):
+    id_data: int
+    token: str
+
+
+class Select_data_request(BaseModel):
+    select: str
+    token: str
+
