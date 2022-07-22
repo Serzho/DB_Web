@@ -1,7 +1,7 @@
-import sqlite3
 from datetime import datetime
 
 import sqlalchemy.exc
+import sqlite3
 
 from service import load_session, base_logger
 from data_table import Data

@@ -1,7 +1,8 @@
-from auth_controller import AuthController
 from fastapi import *
 from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
+
+from auth_controller import AuthController
 from requests_models import *
 from user_table import NAME_MAX_LENGTH
 from service import base_logger, create_logger, create_json_response

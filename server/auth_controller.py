@@ -1,12 +1,11 @@
 import hashlib
 from getpass import getpass
-# TODO: исправить порядок модулей
+import secrets
+from datetime import datetime
 
 from user_table import User
 from token_table import Token
-import secrets
 from tokens_controller import TokensController
-from datetime import datetime
 from service import load_session, base_logger
 
 

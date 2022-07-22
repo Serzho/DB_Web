@@ -1,4 +1,5 @@
 import sqlalchemy
+
 from service import Base_auth
 
 NAME_MAX_LENGTH = 100
