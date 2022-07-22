@@ -18,12 +18,12 @@ def load_session(session_type: str) -> (Session, bool):
     if session_type == "auth":
         db_exists = Path.exists(Path("tmp/auth.db"))
         engine = create_engine(
-            f"sqlite:///tmp/auth.db?check_same_thread=False")  # создание движка базы данных
+            f"sqlite:////tmp/auth.db?check_same_thread=False")  # создание движка базы данных
         Base_auth.metadata.create_all(bind=engine)  # создание базы данных
     elif session_type == "data":
         db_exists = Path.exists(Path("tmp/database.db"))
         engine = create_engine(
-            f"sqlite:///tmp/database.db?check_same_thread=False")  # создание движка базы данных
+            f"sqlite:////tmp/database.db?check_same_thread=False")  # создание движка базы данных
         Base_db.metadata.create_all(bind=engine)  # создание базы данных
 
     return Session(bind=engine), db_exists
