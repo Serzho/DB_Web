@@ -3,10 +3,16 @@ from requests.exceptions import ConnectionError
 
 from commands_handler import *
 # TODO: сделать автоматическую ре-аунтетификацию
-# TODO: добавить новые команды
 # главный исполняемый файл клиента
+print("Please, input server ip address: ")
+input_ip = input()
+print("Please, input server port: ")
+input_port = input()
 
-commandHandler = CommandsHandler()
+if input_port and input_ip:
+    commandHandler = CommandsHandler(input_ip=input_ip, input_port=input_port)
+else:
+    commandHandler = CommandsHandler()
 
 server_connected = False
 

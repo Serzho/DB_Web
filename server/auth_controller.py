@@ -68,7 +68,7 @@ class AuthController:  # класс контроллера базы данных
             User.hashed_password == hashed_auth_password
         ).first()
         if user is not None:
-            log(f"User finded: id = {user.id}")
+            log(f"User found: id = {user.id}")
             id_auth_user = user.id
             print("Correct!")
             print("Creating access token...")

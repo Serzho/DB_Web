@@ -17,5 +17,3 @@ class Data(Base_db):
         self.key = key
         self.value = value
         self.time_creation = time_creation
-
-

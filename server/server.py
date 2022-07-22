@@ -29,38 +29,49 @@ log("App created!")
 async def test() -> JSONResponse:
     # print("TEST")
     log("Test request")
-    return create_json_response({"success": 1})
+    return create_json_response({"success": True})
 
 
 @app.get("/add_data")
 async def add_data(add_info: Adding_data_request) -> JSONResponse:
-    print(add_info.key, add_info.value, add_info.token)
+    log(f"Adding data request: token = {add_info.token}, key = {add_info.key}, value = {add_info.value}")
     if auth_controller.token_exists(add_info.token):
         db_controller.append_data(
             author_id=auth_controller.get_token_id(add_info.token),
             key=add_info.key,
             value=add_info.value,
         )
+        log(f"Correct adding data request")
         return create_json_response({"success": True})
     else:
+        log("Adding data request with incorrect token!")
         return create_json_response({"success": False})
 
 
 @app.get("/remove_data")
-async def remove_data(remove_info: Removing_data_request):
+async def remove_data(remove_info: Removing_data_request) -> JSONResponse:
+    log(f"Removing data request: token = {remove_info.token}, data id = {remove_info.id_data}")
     if auth_controller.token_exists(remove_info.token):
-        db_controller.remove_data(id_row=remove_info.id_data)
-        return create_json_response({"success": True})
+        correct_removing = db_controller.remove_data(id_row=remove_info.id_data)
+        if correct_removing:
+            log("Correct removing data request")
+        else:
+            log(f"Incorrect removing data with id = {remove_info.id_data}")
+        return create_json_response({"success": correct_removing})
     else:
+        log("Removing request with incorrect token!")
         return create_json_response({"success": False})
 
 
 @app.get("/select_data")
-async def select_data(select_info: Select_data_request):
+async def select_data(select_info: Select_data_request) -> JSONResponse:
+    log(f"Selecting data request: token = {select_info.token}, sql_request = {select_info.select}")
     if auth_controller.token_exists(select_info.token):
         selected_data = db_controller.select(sql_request=select_info.select)
+        log("Correct sql request!")
         return create_json_response({"success": True, "data": selected_data})
     else:
+        log("Sql request with incorrect token!")
         return create_json_response({"success": False})
 
 
@@ -70,8 +81,10 @@ async def get_item() -> FileResponse:
     log("Database file request")
     return FileResponse("tmp/database.db")
 
+
 @app.get("/auth_item")
 async def get_auth_item() -> FileResponse:
+    log("Auth database file request")
     return FileResponse("tmp/auth.db")
 
 
@@ -100,7 +113,7 @@ async def get_users(token_request: Standard_token_request) -> JSONResponse:
     # проверка токена и прав доступа админа для совершения запроса
     log(f"Getting users request: token = {token_request.token}")
     if auth_controller.token_exists(token_request.token) and auth_controller.token_is_admin(
-            token_request.token) and token_request.token != "": # TODO: переделать
+            token_request.token):
         log(f"Result: success = {True}, len of users list = {len(auth_controller.users_list())}")
         return create_json_response({"success": True, "data": auth_controller.users_list()})
     else:
