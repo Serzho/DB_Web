@@ -91,7 +91,6 @@ class AuthController:  # класс контроллера базы данных
     def __create_token(self, id_auth: int) -> str:  # функция создания токена
         log(f"Creating token with id = {id_auth}")
         token = secrets.token_hex(16)  # получение случайного значения
-        print(f"Id of token {id_auth}")
         users_id = self.session.query(User.id)
         for user in users_id:
             if user.id != id_auth:
@@ -196,7 +195,6 @@ class AuthController:  # класс контроллера базы данных
         ).first()
         if tokens_user is not None:
             log(f"Result: token = {token}, id of token = {tokens_user.id}")
-            print(f"id of token {tokens_user.id}")
             return tokens_user.id
         else:
             log(f"Result: id of token = {token} wasn't find!!!")

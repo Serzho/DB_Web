@@ -33,38 +33,41 @@ class CommandsHandler:
             f'http://{self.ip}:{self.port}/select_data',
             json={"select": sql_request, "token": self.token}
         )
-        print(json.loads(response.content).get("success"))
-        success = json.loads(response.content).get("success")
+        success, data = self.__load_response(response)
         if success:
-            data = json.loads(response.content).get("data")
             for line in data:
                 print(line)
-        else:
+        elif data is None:
             print("Incorrect token!")
+        else:
+            print("Incorrect sql request!")
 
     def add_data(self, key: str, value: str) -> None:
         response = requests.get(
             f'http://{self.ip}:{self.port}/add_data',
             json={"key": key, "value": value, "token": self.token}
         )
-        success = json.loads(response.content).get("success")
+        success, data = self.__load_response(response)
         if success:
             print("Correct adding data")
         else:
-            print("incorrect token!")
+            print("Incorrect token!")
 
     def remove_data(self, id_data: str) -> None:
-        response = requests.get(
-            f'http://{self.ip}:{self.port}/remove_data',
-            json={"id_data": int(id_data), "token": self.token}
-        )
-        success = json.loads(response.content).get("success")
-        if success:
-            print("Correct removing data!")
-        elif self.test_token():
-            print(f"Row number {id_data} not found!")
+        if id_data.isdigit():
+            response = requests.get(
+                f'http://{self.ip}:{self.port}/remove_data',
+                json={"id_data": int(id_data), "token": self.token}
+            )
+            success, data = self.__load_response(response)
+            if success:
+                print("Correct removing data!")
+            elif self.test_token():
+                print(f"Row number {id_data} not found!")
+            else:
+                print("Incorrect token!")
         else:
-            print("Incorrect token!")
+            print("Incorrect parameter!")
 
     def print_help(self) -> None:  # вывод сообщения с доступными командами
         text = "\nPrint '/help' to get help." \
@@ -91,7 +94,7 @@ class CommandsHandler:
     def test_request(self) -> bool:  # проверка доступа к серверу
         print("Trying to connect...")
         response = requests.get(f'http://{self.ip}:{self.port}/test')
-        success = bool(json.loads(response.content).get("success"))
+        success, data = self.__load_response(response)
         if success:
             print("Successful request to server!!!")
         else:
@@ -105,9 +108,9 @@ class CommandsHandler:
                 f'http://{self.ip}:{self.port}/auth/',
                 json={"name": name, "password": password}
             )
-            success = bool(json.loads(response.content).get("success"))
+            success, data = self.__load_response(response)
             if success:
-                token = json.loads(response.content).get("data")
+                token = data
                 print(f"Correct authentication! Token {token}")
                 self.token = token
             else:
@@ -115,16 +118,17 @@ class CommandsHandler:
         else:
             print("Incorrect parameters!!!")
 
-    def test_token(self) -> None:  # проверка токена доступа
+    def test_token(self) -> bool:  # проверка токена доступа
         response = requests.get(
             f'http://{self.ip}:{self.port}/test_token',
             json={"token": self.token}
         )
-        success = json.loads(response.content).get("success")
+        success, data = self.__load_response(response)
         if success:
             print("Correct access token!")
         else:
             print("Incorrect access token!")
+        return success
 
     def get_users(self) -> None:  # получение списка всех пользователей
         print(f"Get users with token {self.token}")
@@ -132,9 +136,9 @@ class CommandsHandler:
             f'http://{self.ip}:{self.port}/get_users',
             json={"token": self.token}
         )
-        success = json.loads(response.content).get("success")
+        success, data = self.__load_response(response)
         if success:
-            users_list = json.loads(response.content).get("data")
+            users_list = data
             for user in users_list:
                 print(user)
         else:
@@ -146,13 +150,13 @@ class CommandsHandler:
             f'http://{self.ip}:{self.port}/add_user',
             json={"token": self.token, "name": name, "password": password, "is_admin": is_admin}
         )
-        success = json.loads(response.content).get("success")
+        success, data = self.__load_response(response)
         if success:
             print("User was added:")
-            print((json.loads(response.content).get("data")))
+            print(data)
         else:
             print("Error: ")
-            print((json.loads(response.content).get("data")))
+            print(data)
 
     def log_out(self) -> None:  # запрос на отключение токена доступа
         requests.get(
@@ -167,7 +171,8 @@ class CommandsHandler:
             f'http://{self.ip}:{self.port}/delete_user',
             json={"token": self.token, "id": id_user}
         )
-        print((json.loads(response.content).get("data")))
+        success, message = self.__load_response(response)
+        print(message)
 
     def input_command(self, unit_test_input=None) -> {str: list}:
         if unit_test_input is None:
@@ -184,7 +189,7 @@ class CommandsHandler:
                     user_input.update({"argv": input_string})
             else:
                 user_input.update({"argv": []})
-            print(user_input.get("command"), user_input.get("argv"))
+            # print(user_input.get("command"), user_input.get("argv"))
         else:
             user_input = {"command": "empty"}
         if unit_test_input is not None:
@@ -193,9 +198,20 @@ class CommandsHandler:
 
     def run_command(self, user_input: {str: list}):
         if len(user_input.get("argv")) != len(self.commands_dict.get(user_input.get("command")).get("argv")):
-            print(len(user_input.get("argv")))
+            # print(len(user_input.get("argv")))
             print("Invalid parameter")
         else:
             self.commands_dict.get(
                 user_input.get("command")
             ).get("f_name")(*user_input.get("argv"))
+
+    def __load_response(self, response: requests.models.Response):
+        success, data = None, None
+        try:
+            success = json.loads(response.content).get("success")
+            data = json.loads(response.content).get("data")
+        except json.decoder.JSONDecodeError:
+            print("Bad server response!!!")
+        return success, data
+
+

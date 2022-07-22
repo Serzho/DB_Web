@@ -67,9 +67,9 @@ async def remove_data(remove_info: Removing_data_request) -> JSONResponse:
 async def select_data(select_info: Select_data_request) -> JSONResponse:
     log(f"Selecting data request: token = {select_info.token}, sql_request = {select_info.select}")
     if auth_controller.token_exists(select_info.token):
-        selected_data = db_controller.select(sql_request=select_info.select)
-        log("Correct sql request!")
-        return create_json_response({"success": True, "data": selected_data})
+        success, selected_data = db_controller.select(sql_request=select_info.select)
+        log("SQL request completed!")
+        return create_json_response({"success": success, "data": selected_data})
     else:
         log("Sql request with incorrect token!")
         return create_json_response({"success": False})

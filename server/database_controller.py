@@ -1,4 +1,7 @@
+import sqlite3
 from datetime import datetime
+
+import sqlalchemy.exc
 
 from service import load_session, base_logger
 from data_table import Data
@@ -36,11 +39,16 @@ class DatabaseController:
             log(f"Data row with id = {id_row} wasn't find!")
             return False
 
-    def select(self, sql_request: str):
+    def select(self, sql_request: str) -> (bool, list):
         log(f"Selecting data by request = {sql_request}")
-        sql_response = self.session.execute(sql_request)
         returning_list = []
-        for row in sql_response:
-            returning_list.append(list(row))
-        log(f"Successful selecting request!")
-        return returning_list
+        try:
+            sql_response = self.session.execute(sql_request)
+            for row in sql_response:
+                returning_list.append(list(row))
+            log(f"Successful selecting request!")
+            return True, returning_list
+        except (sqlalchemy.exc.OperationalError, sqlite3.OperationalError):
+            log("Bad sql request!")
+            return False, returning_list
+
