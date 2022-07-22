@@ -6,11 +6,6 @@ class Auth_request(BaseModel):  # модель запроса аутентифи
     password: str
 
 
-class Server_command_request(BaseModel):  # модель стандартного запроса с токеном
-    command: str
-    token: str
-
-
 class Standard_token_request(BaseModel):  # модель стандартного запроса с токеном
     token: str
 
