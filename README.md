@@ -1,7 +1,7 @@
 # Database_Server
 ## Server
 Database server with API and authentication.   
-Using SQLAlchemy, FastAPI and Unicorn 
+Using SQLAlchemy, FastAPI and Uvicorn 
 
 ## Install requirements  
 `$pip install -r requirements.txt`  
